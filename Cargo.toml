@@ -1,0 +1,13 @@
+[package]
+name = "trek"
+version = "0.0.0"
+authors = ["Fangdun Cai <cfddream@gmail.com>"]
+edition = "2018"
+description = "A web framework for Rust"
+repository = "https://github.com/trek-rs/trek"
+readme = "README.md"
+keywords = ["trek", "http", "web", "framework"]
+categories = ["network-programming","web-programming::http-server"]
+license = "MIT"
+
+[dependencies]
