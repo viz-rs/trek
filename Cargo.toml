@@ -8,6 +8,6 @@ repository = "https://github.com/trek-rs/trek"
 readme = "README.md"
 keywords = ["trek", "http", "web", "framework"]
 categories = ["network-programming","web-programming::http-server"]
-license = "MIT"
+license = "MIT/Apache-2.0"
 
 [dependencies]
