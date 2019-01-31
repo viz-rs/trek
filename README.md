@@ -12,3 +12,12 @@ This project is licensed under either of
    http://opensource.org/licenses/MIT)
 
 at your option.
+
+
+## BTW
+
+Thanks to Brent Houghton <houghton.brent@gmail.com>. He is the first owner
+of the [trek] package on [Crates.io].
+
+[trek]: https://crates.io/crates/trek
+[crates.io]: https://crates.io/
