@@ -1,7 +1,7 @@
-mod error;
+pub mod error;
 
-mod request;
+pub mod request;
 
-mod response;
+pub mod response;
 
-mod context;
+pub mod context;
