@@ -123,4 +123,7 @@ impl<State> Context<State> {
     pub fn multipart(&self) {}
 
     pub fn cookies(&self) {}
+
+    // generate url
+    pub fn url_for(&self) {}
 }
