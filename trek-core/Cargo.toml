@@ -1,5 +1,5 @@
 [package]
-name = "trek-engine"
+name = "trek-core"
 version = "0.1.0"
 authors = ["Fangdun Cai <cfddream@gmail.com>"]
 edition = "2018"
@@ -7,3 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+http = "0.1.18"
+hyper = "0.13.0-alpha.1"
+serde = "1.0.101"
+serde_json = "1.0.40"
+serde_qs = "0.5.0"

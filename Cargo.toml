@@ -1,5 +1,5 @@
 [workspace]
 members = [
     "trek",
-    "trek-engine"
+    "trek-core"
 ]
