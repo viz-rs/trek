@@ -24,6 +24,7 @@ fn context() {
     let mut cx = Context::new(
         Arc::new(State {}),
         hyper::Request::builder()
+            .method("POST")
             .uri("https://crates.io/search?q=web")
             .header("Content-Type", "application/json")
             .body(Body::from(
@@ -38,7 +39,7 @@ fn context() {
 
     // dbg!(&cx);
 
-    assert_eq!(cx.method(), "GET");
+    assert_eq!(cx.method(), "POST");
     assert_eq!(cx.version(), Version::HTTP_11);
     assert_eq!(cx.path(), "/search");
 
@@ -65,16 +66,23 @@ fn context() {
     let stream = stream::iter(chunks);
     let body = Body::wrap_stream(stream);
 
-    let mut cx = Context::new(
-        Arc::new(State {}),
-        hyper::Request::builder()
-            .method("POST")
-            .uri("https://crates.io/")
-            .body(body)
-            .unwrap(),
-    );
+    *cx.take_body() = body;
 
     // dbg!(&cx);
 
     assert_eq!(block_on(cx.string()).unwrap(), "hello world");
+
+    *cx.header_mut("Content-Type").unwrap() =
+        HeaderValue::from_str("application/x-www-form-urlencoded").unwrap();
+    *cx.take_body() = Body::from("name=trek&age=1966");
+
+    // dbg!(&cx);
+
+    assert_eq!(
+        block_on(cx.form::<Json>()).unwrap(),
+        Json {
+            name: "trek".to_owned(),
+            age: 1966,
+        }
+    );
 }

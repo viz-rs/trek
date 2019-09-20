@@ -84,8 +84,8 @@ impl<State> Context<State> {
         self.request.extensions_mut()
     }
 
-    pub fn raw_body(&mut self) -> &mut Body {
-        // pub fn raw_body(&mut self) -> Body {
+    pub fn take_body(&mut self) -> &mut Body {
+        // pub fn take_body(&mut self) -> Body {
         // std::mem::replace(self.request.body_mut(), Body::empty())
         self.request.body_mut()
     }
@@ -96,8 +96,8 @@ impl<State> Context<State> {
     /// https://github.com/rustasync/http-service/blob/master/src/lib.rs#L96
     pub async fn bytes(&mut self) -> Result<Vec<u8>> {
         let mut bytes = Vec::new();
-        let raw_body = self.raw_body();
-        while let Some(chunk) = raw_body.next().await {
+        let body = self.take_body();
+        while let Some(chunk) = body.next().await {
             bytes.extend(chunk.map_err(|_| ErrorKind::InvalidData)?);
         }
         Ok(bytes)
@@ -123,13 +123,16 @@ impl<State> Context<State> {
 
     pub fn query<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
         let query = self.query_string();
-        Ok(serde_qs::from_str::<T>(query).map_err(|_| ErrorKind::InvalidData)?)
+        Ok(serde_qs::from_str(query).map_err(|_| ErrorKind::InvalidData)?)
     }
 
     pub fn param(&self) {}
 
     /// `application/x-www-form-urlencoded`
-    pub fn form(&self) {}
+    pub async fn form<T: serde::de::DeserializeOwned>(&mut self) -> Result<T> {
+        let body = self.bytes().await?;
+        Ok(serde_urlencoded::from_bytes(&body).map_err(|_| ErrorKind::InvalidData)?)
+    }
 
     /// https://github.com/expressjs/multer
     /// https://crates.io/crates/multipart
