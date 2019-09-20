@@ -1,4 +1,5 @@
 use futures::{executor::block_on, stream};
+use http::header::HeaderValue;
 use hyper::{Body, Version};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -24,6 +25,7 @@ fn context() {
         Arc::new(State {}),
         hyper::Request::builder()
             .uri("https://crates.io/search?q=web")
+            .header("Content-Type", "application/json")
             .body(Body::from(
                 serde_json::to_vec(&Json {
                     name: "trek".to_owned(),
@@ -39,6 +41,11 @@ fn context() {
     assert_eq!(cx.method(), "GET");
     assert_eq!(cx.version(), Version::HTTP_11);
     assert_eq!(cx.path(), "/search");
+
+    assert_eq!(cx.header("Content-Type").unwrap(), "application/json");
+    *cx.header_mut("Content-Type").unwrap() = HeaderValue::from_str("application/xml").unwrap();
+    assert_eq!(cx.header("Content-Type").unwrap(), "application/xml");
+
     assert_eq!(cx.query_string(), "q=web");
     assert_eq!(
         cx.query::<Query>().unwrap(),

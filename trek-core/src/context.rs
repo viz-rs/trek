@@ -1,5 +1,8 @@
 use http::Extensions;
-use hyper::{Body, HeaderMap, Method, Uri, Version};
+use hyper::{
+    header::{HeaderMap, HeaderValue},
+    Body, Method, Uri, Version,
+};
 use std::{
     io::{ErrorKind, Result},
     sync::Arc,
@@ -30,6 +33,10 @@ impl<State> Context<State> {
         self.request.method()
     }
 
+    pub fn method_mut(&mut self) -> &mut Method {
+        self.request.method_mut()
+    }
+
     /// Access the request's full URI method.
     pub fn uri(&self) -> &Uri {
         self.request.uri()
@@ -57,6 +64,14 @@ impl<State> Context<State> {
 
     pub fn headers_mut(&mut self) -> &mut HeaderMap {
         self.request.headers_mut()
+    }
+
+    pub fn header(&self, key: &'static str) -> Option<&HeaderValue> {
+        self.headers().get(key)
+    }
+
+    pub fn header_mut(&mut self, key: &'static str) -> Option<&mut HeaderValue> {
+        self.headers_mut().get_mut(key)
     }
 
     /// Access the extensions to the context.
