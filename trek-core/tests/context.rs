@@ -85,4 +85,36 @@ fn context() {
             age: 1966,
         }
     );
+
+    let formdata: &[&[u8]] = &[
+        b"--boundary\r",
+        b"\n",
+        b"Content-Disposition:",
+        b" form-data; name=",
+        b"\"foo\"",
+        b"\r\n\r\n",
+        b"field data",
+        b"\r",
+        b"\n--boundary--",
+    ];
+
+    let chunks: Vec<Result<_, ::std::io::Error>> = formdata.iter().map(|b| Ok(*b)).collect();
+    let stream = stream::iter(chunks);
+    let body = Body::wrap_stream(stream);
+
+    *cx.header_mut("Content-Type").unwrap() =
+        HeaderValue::from_str("multipart/form-data; boundary=boundary").unwrap();
+    *cx.take_body() = body;
+
+    // dbg!(&cx);
+
+    block_on(async move {
+        let mut multipart = cx.multipart().unwrap();
+
+        while let Some(field) = multipart.next_field().await.unwrap() {
+            // dbg!(&field);
+            assert_eq!(field.headers.name, "foo");
+            assert_eq!(field.data.read_to_string().await.unwrap(), "field data");
+        }
+    });
 }

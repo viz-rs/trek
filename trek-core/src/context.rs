@@ -3,8 +3,9 @@ use hyper::{
     header::{HeaderMap, HeaderValue},
     Body, Method, Uri, Version,
 };
+use multipart_async::server::Multipart;
 use std::{
-    io::{ErrorKind, Result},
+    io::{Error, ErrorKind, Result},
     sync::Arc,
 };
 
@@ -94,6 +95,7 @@ impl<State> Context<State> {
     /// https://github.com/actix/actix-web/blob/master/src/types/form.rs#L332
     /// https://github.com/stream-utils/raw-body
     /// https://github.com/rustasync/http-service/blob/master/src/lib.rs#L96
+    /// https://github.com/seanmonstar/warp/blob/master/src/filters/body.rs
     pub async fn bytes(&mut self) -> Result<Vec<u8>> {
         let mut bytes = Vec::new();
         let body = self.take_body();
@@ -101,6 +103,8 @@ impl<State> Context<State> {
             bytes.extend(chunk.map_err(|_| ErrorKind::InvalidData)?);
         }
         Ok(bytes)
+        // use futures::stream::TryStreamExt;
+        // Ok(self.take_body().try_concat().await.unwrap().to_vec())
     }
 
     pub async fn json<T: serde::de::DeserializeOwned>(&mut self) -> Result<T> {
@@ -138,7 +142,22 @@ impl<State> Context<State> {
     /// https://crates.io/crates/multipart
     /// https://github.com/abonander/multipart-async
     /// `multipart/form-data`
-    pub fn multipart(&self) {}
+    // pub async fn multipart(&mut self) -> Result<Multipart<Vec<u8>>> {
+    pub fn multipart(&mut self) -> Result<Multipart<&mut Body>> {
+        const BOUNDARY: &str = "boundary=";
+
+        let boundary = self
+            .headers()
+            .get("Content-Type")
+            .and_then(|ct| {
+                let ct = ct.to_str().ok()?;
+                let idx = ct.find(BOUNDARY)?;
+                Some(ct[idx + BOUNDARY.len()..].to_string())
+            })
+            .ok_or_else(|| Error::new(ErrorKind::Other, "no boundary found"))?;
+
+        Ok(Multipart::with_body(self.take_body(), boundary))
+    }
 
     pub fn cookies(&self) {}
 
