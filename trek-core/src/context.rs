@@ -1,6 +1,6 @@
 use http::Extensions;
 use hyper::{
-    header::{HeaderMap, HeaderValue},
+    header::{HeaderMap, HeaderValue, CONTENT_TYPE},
     Body, Method, Uri, Version,
 };
 use multipart_async::server::Multipart;
@@ -148,7 +148,7 @@ impl<State> Context<State> {
 
         let boundary = self
             .headers()
-            .get("Content-Type")
+            .get(CONTENT_TYPE)
             .and_then(|ct| {
                 let ct = ct.to_str().ok()?;
                 let idx = ct.find(BOUNDARY)?;
@@ -163,4 +163,7 @@ impl<State> Context<State> {
 
     // generate url
     pub fn url_for(&self) {}
+
+    /// Next middleare
+    pub fn next(&self) {}
 }
