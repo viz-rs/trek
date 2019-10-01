@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "trek",
-    "trek-core"
+    "trek-core",
+    "trek-router"
 ]

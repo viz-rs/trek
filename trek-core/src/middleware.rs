@@ -9,20 +9,18 @@
 //!     * https://github.com/iron/iron/blob/master/iron/src/middleware/mod.rs#L135
 //!     * https://github.com/koajs/compose/blob/master/index.js
 
+use crate::response::Response;
 use futures::future::BoxFuture;
 
-pub trait Middleware<Context, Output>: Send + Sync {
-    fn call<'a>(&'a self, cx: Context) -> BoxFuture<'a, Output>;
+pub trait Middleware<Context>: Send + Sync + 'static {
+    fn call(&self, cx: Context) -> BoxFuture<'static, Response>;
 }
 
-impl<Context, Output, F> Middleware<Context, Output> for F
+impl<Context, F> Middleware<Context> for F
 where
-    F: Send + Sync + 'static + Fn(Context) -> BoxFuture<'static, Output>,
+    F: Send + Sync + 'static + Fn(Context) -> BoxFuture<'static, Response>,
 {
-    fn call<'a>(&'a self, cx: Context) -> BoxFuture<'a, Output> {
+    fn call(&self, cx: Context) -> BoxFuture<'static, Response> {
         (self)(cx)
     }
 }
-
-pub type DynMiddleware<Context, Output> =
-    dyn (Fn(Context) -> BoxFuture<'static, Output>) + 'static + Send + Sync;

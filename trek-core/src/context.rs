@@ -1,3 +1,4 @@
+use futures::future::BoxFuture;
 use http::Extensions;
 use hyper::{
     header::{HeaderMap, HeaderValue, CONTENT_TYPE},
@@ -9,19 +10,29 @@ use std::{
     sync::Arc,
 };
 
+use crate::middleware::Middleware;
 use crate::request::Request;
+use crate::response::Response;
 
 /// The `Context` of the current HTTP request.
-#[derive(Debug)]
 pub struct Context<State> {
     state: Arc<State>,
     request: Request,
+    handlers: Vec<Arc<dyn Middleware<Self>>>,
 }
 
-impl<State> Context<State> {
+impl<State: 'static> Context<State> {
     /// Create a new Context
-    pub fn new(state: Arc<State>, request: Request) -> Self {
-        Self { state, request }
+    pub fn new(
+        state: Arc<State>,
+        request: Request,
+        handlers: Vec<Arc<dyn Middleware<Self>>>,
+    ) -> Self {
+        Self {
+            state,
+            request,
+            handlers,
+        }
     }
 
     ///  Access the state.
@@ -165,5 +176,12 @@ impl<State> Context<State> {
     pub fn url_for(&self) {}
 
     /// Next middleare
-    pub fn next(&self) {}
+    /// TODO: use `'a` lifetime for `BoxFuture<'a, Response>`
+    pub fn next(mut self) -> BoxFuture<'static, Response> {
+        if self.handlers.is_empty() {
+            Box::pin(async { hyper::Response::new(Body::empty()) })
+        } else {
+            self.handlers.remove(0).call(self)
+        }
+    }
 }

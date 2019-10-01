@@ -1,9 +1,16 @@
-use futures::{executor::block_on, stream};
+use futures::future::{ready, BoxFuture, Future};
+use futures::{
+    executor::block_on,
+    stream::{self, TryStreamExt},
+};
 use http::header::HeaderValue;
 use hyper::{Body, Version};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use trek_core::context::Context;
+use trek_core::handler::*;
+use trek_core::middleware::*;
+use trek_core::response::*;
 
 #[test]
 fn context() {
@@ -21,6 +28,31 @@ fn context() {
         age: u16,
     }
 
+    struct M0 {}
+
+    impl Middleware<Context<State>> for M0 {
+        fn call(&self, cx: Context<State>) -> BoxFuture<'static, Response> {
+            Box::pin(async move {
+                let mut res = cx.next().await;
+
+                let body =
+                    String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap();
+                *res.body_mut() = Body::from(body + " Trek!");
+
+                res
+            })
+        }
+    }
+
+    async fn handler_async(_: Context<State>) -> String {
+        String::from("Star")
+    }
+
+    fn handler(_: Context<State>) -> impl Future<Output = String> {
+        // async { String::from("Star") }
+        ready(String::from("Star"))
+    }
+
     let mut cx = Context::new(
         Arc::new(State {}),
         hyper::Request::builder()
@@ -35,9 +67,11 @@ fn context() {
                 .unwrap(),
             ))
             .unwrap(),
+        // vec![Arc::new(into_middleware(handler))],
+        vec![Arc::new(M0 {}), Arc::new(into_middleware(handler_async))],
     );
 
-    // dbg!(&cx);
+    // // dbg!(&cx);
 
     assert_eq!(cx.method(), "POST");
     assert_eq!(cx.version(), Version::HTTP_11);
@@ -116,5 +150,9 @@ fn context() {
             assert_eq!(field.headers.name, "foo");
             assert_eq!(field.data.read_to_string().await.unwrap(), "field data");
         }
+
+        let mut res = cx.next().await;
+        let body = String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap();
+        assert_eq!(body, "Star Trek!");
     });
 }

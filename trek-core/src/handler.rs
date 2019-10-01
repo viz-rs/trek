@@ -6,59 +6,42 @@
 //!     * https://github.com/rustasync/tide/blob/master/tide-core/src/internal.rs
 //!     * https://github.com/seanmonstar/warp/blob/master/src/generic.rs
 
-use futures::future::{BoxFuture, Future};
+use futures::future::{BoxFuture, Future, FutureExt};
 
-use crate::middleware::DynMiddleware;
+use crate::middleware::Middleware;
 use crate::response::{IntoResponse, Response};
 
-pub trait Handler<Context, Output>: Send + Sync + 'static {
-    type Fut: Future<Output = Output> + Send + 'static;
+pub trait Handler<Context>: Send + Sync + 'static {
+    type Fut: Future<Output = Response> + Send + 'static;
 
     fn call(&self, cx: Context) -> Self::Fut;
 }
 
-impl<Context, Output, F, Fut> Handler<Context, Output> for F
+impl<Context, F, Fut> Handler<Context> for F
 where
     F: Send + Sync + 'static + Fn(Context) -> Fut,
-    Fut: Future<Output = Output> + Send + 'static,
-    Fut::Output: Send + 'static,
+    Fut: Future + Send + 'static,
+    Fut::Output: IntoResponse + Send + 'static,
 {
-    type Fut = Fut;
+    type Fut = BoxFuture<'static, Response>;
 
     fn call(&self, cx: Context) -> Self::Fut {
-        (self)(cx)
+        let fut = (self)(cx);
+        Box::pin(async move { fut.await.into_response() })
     }
 }
 
-pub type DynHandler<Context, Output> =
-    dyn (Fn(Context) -> BoxFuture<'static, Output>) + 'static + Send + Sync;
+pub type DynHandler<Context> =
+    dyn (Fn(Context) -> BoxFuture<'static, Response>) + 'static + Send + Sync;
 
-pub fn into_dyn_handler<Context, Output>(
-    f: impl Handler<Context, Output>,
-) -> Box<DynHandler<Context, Output>> {
-    Box::new(move |cx| Box::pin(f.call(cx)))
+pub fn into_dyn_handler<Context>(f: impl Handler<Context>) -> Box<DynHandler<Context>> {
+    Box::new(move |cx| f.call(cx).boxed())
 }
 
-pub fn wrap_handler<Context, Output>(
-    f: impl Handler<Context, Output>,
-) -> impl Handler<Context, Response>
+pub fn into_middleware<Context>(f: impl Handler<Context>) -> impl Middleware<Context>
 where
-    Output: IntoResponse + Send + 'static,
+    Context: Send + 'static,
 {
-    Box::new(move |cx| {
-        let fut = f.call(cx);
-        Box::pin(async move { fut.await.into_response() })
-    })
-}
-
-pub fn into_dyn_middleware<Context, Output>(
-    f: impl Handler<Context, Output>,
-) -> Box<DynMiddleware<Context, Response>>
-where
-    Output: IntoResponse + Send + 'static,
-{
-    Box::new(move |cx| {
-        let fut = f.call(cx);
-        Box::pin(async move { fut.await.into_response() })
-    })
+    let f = into_dyn_handler(f);
+    Box::new(move |cx| (f)(cx))
 }
