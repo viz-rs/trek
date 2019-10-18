@@ -67,6 +67,7 @@ fn context() {
                 .unwrap(),
             ))
             .unwrap(),
+        // vec![],
         // vec![Arc::new(into_middleware(handler))],
         vec![Arc::new(M0 {}), Arc::new(into_middleware(handler_async))],
     );

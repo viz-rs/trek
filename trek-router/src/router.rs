@@ -1,17 +1,23 @@
 use http::Method;
 use path_tree::PathTree;
 use std::collections::HashMap;
+use std::fmt;
+use std::sync::Arc;
 
-pub type Trees<H> = HashMap<Method, PathTree<H>>;
+use trek_core::{
+    handler::{into_box_dyn_handler, DynHandler, Handler},
+    middleware::Middleware,
+};
 
-#[derive(Clone, Debug)]
-pub struct Router<H> {
+pub type Trees<Handler> = HashMap<Method, PathTree<Handler>>;
+
+pub struct Router<Context> {
     path: String,
-    trees: Trees<H>,
-    middleware: Vec<H>,
+    trees: Trees<Box<DynHandler<Context>>>,
+    middleware: Vec<Arc<dyn Middleware<Context>>>,
 }
 
-impl<H: Clone> Router<H> {
+impl<Context> Router<Context> {
     pub fn new() -> Self {
         Self {
             path: "/".to_owned(),
@@ -20,8 +26,8 @@ impl<H: Clone> Router<H> {
         }
     }
 
-    pub fn middleware(&mut self, handler: H) -> &mut Self {
-        self.middleware.push(handler);
+    pub fn middleware(&mut self, m: impl Middleware<Context>) -> &mut Self {
+        self.middleware.push(Arc::new(m));
         self
     }
 
@@ -37,10 +43,18 @@ impl<H: Clone> Router<H> {
 
         f(&mut router);
 
+        self.trees.clone_from(&router.trees);
+
         self
     }
 
-    fn _handle(&mut self, method: Method, path: &str, handler: H) -> &mut Self {
+    fn _handle(
+        &mut self,
+        method: Method,
+        path: &str,
+        handler: Box<DynHandler<Context>>,
+    ) -> &mut Self {
+        let path = &Self::join_paths(&self.path, path);
         self.trees
             .entry(method)
             .or_insert_with(PathTree::new)
@@ -48,60 +62,64 @@ impl<H: Clone> Router<H> {
         self
     }
 
-    pub fn handle(&mut self, method: Method, path: &str, handler: H) -> &mut Self {
-        self._handle(method, path, handler)
+    pub fn handle(
+        &mut self,
+        method: Method,
+        path: &str,
+        handler: impl Handler<Context> + Clone,
+    ) -> &mut Self {
+        self._handle(method, path, into_box_dyn_handler(handler))
     }
 
-    pub fn get(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn get(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::GET, path, handler)
     }
 
-    pub fn post(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn post(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::POST, path, handler)
     }
 
-    pub fn delete(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn delete(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::DELETE, path, handler)
     }
 
-    pub fn patch(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn patch(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::PATCH, path, handler)
     }
 
-    pub fn put(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn put(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::PUT, path, handler)
     }
 
-    pub fn options(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn options(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::OPTIONS, path, handler)
     }
 
-    pub fn head(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn head(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::HEAD, path, handler)
     }
 
-    pub fn connect(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn connect(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::CONNECT, path, handler)
     }
 
-    pub fn trace(&mut self, path: &str, handler: H) -> &mut Self {
+    pub fn trace(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
         self.handle(Method::TRACE, path, handler)
     }
 
-    pub fn any(&mut self, path: &str, handler: H) -> &mut Self {
-        let path = &Self::join_paths(&self.path, path);
-        self._handle(Method::GET, path, handler.to_owned())
-            ._handle(Method::POST, path, handler.to_owned())
-            ._handle(Method::DELETE, path, handler.to_owned())
-            ._handle(Method::PATCH, path, handler.to_owned())
-            ._handle(Method::PUT, path, handler.to_owned())
-            ._handle(Method::OPTIONS, path, handler.to_owned())
-            ._handle(Method::HEAD, path, handler.to_owned())
-            ._handle(Method::CONNECT, path, handler.to_owned())
-            ._handle(Method::TRACE, path, handler.to_owned())
+    pub fn any(&mut self, path: &str, handler: impl Handler<Context> + Clone) -> &mut Self {
+        self.handle(Method::GET, path, handler.clone())
+            .handle(Method::POST, path, handler.clone())
+            .handle(Method::DELETE, path, handler.clone())
+            .handle(Method::PATCH, path, handler.clone())
+            .handle(Method::PUT, path, handler.clone())
+            .handle(Method::OPTIONS, path, handler.clone())
+            .handle(Method::HEAD, path, handler.clone())
+            .handle(Method::CONNECT, path, handler.clone())
+            .handle(Method::TRACE, path, handler)
     }
 
-    pub(crate) fn join_paths(a: &str, mut b: &str) -> String {
+    pub(crate) fn join_paths(a: &str, b: &str) -> String {
         if b.is_empty() {
             return a.to_owned();
         }
@@ -112,8 +130,16 @@ impl<H: Clone> Router<H> {
         &'a self,
         method: &'a Method,
         path: &'a str,
-    ) -> Option<(&'a H, Vec<(&'a str, &'a str)>)> {
+    ) -> Option<(&'a Box<DynHandler<Context>>, Vec<(&'a str, &'a str)>)> {
         let tree = self.trees.get(method)?;
         tree.find(path)
+    }
+}
+
+impl<Context> fmt::Debug for Router<Context> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_struct("Router")
+            .field("path", &self.path)
+            .finish()
     }
 }
