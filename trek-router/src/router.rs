@@ -119,20 +119,20 @@ impl<Context> Router<Context> {
             .handle(Method::TRACE, path, handler)
     }
 
+    pub fn find<'a>(
+        &'a self,
+        method: Method,
+        path: &'a str,
+    ) -> Option<(&'a Box<DynHandler<Context>>, Vec<(&'a str, &'a str)>)> {
+        let tree = self.trees.get(&method)?;
+        tree.find(path)
+    }
+
     pub(crate) fn join_paths(a: &str, b: &str) -> String {
         if b.is_empty() {
             return a.to_owned();
         }
         a.trim_end_matches('/').to_owned() + "/" + b.trim_start_matches('/')
-    }
-
-    pub fn find<'a>(
-        &'a self,
-        method: &'a Method,
-        path: &'a str,
-    ) -> Option<(&'a Box<DynHandler<Context>>, Vec<(&'a str, &'a str)>)> {
-        let tree = self.trees.get(method)?;
-        tree.find(path)
     }
 }
 
