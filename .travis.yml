@@ -4,4 +4,4 @@ rust:
   - nightly
 
 script:
-  - cargo test --all --all-features
+  - cargo test --all

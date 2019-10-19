@@ -1,11 +1,11 @@
 # Trek
 
+A web framework for Rust.
+
 [![Build Status](https://travis-ci.org/trek-rs/trek.svg?branch=master)](https://travis-ci.org/trek-rs/trek)
 [![Latest version](https://img.shields.io/crates/v/trek.svg)](https://crates.io/crates/trek)
 [![Documentation](https://docs.rs/trek/badge.svg)](https://docs.rs/trek)
 ![License](https://img.shields.io/crates/l/trek.svg)
-
-A web framework for Rust.
 
 ## License
 
