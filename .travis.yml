@@ -4,4 +4,4 @@ rust:
   - nightly
 
 script:
-  - cargo test -Zmtime-on-use --all-features
+  - cargo test
