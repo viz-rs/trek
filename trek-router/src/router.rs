@@ -137,7 +137,7 @@ impl<Context> Router<Context> {
 }
 
 impl<Context> fmt::Debug for Router<Context> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("Router")
             .field("path", &self.path)
             .finish()
