@@ -144,10 +144,12 @@ impl<Context> Router<Context> {
         path: &str,
         maps: &[(Resources, Box<DynHandler<Context>>)],
     ) -> &mut Self {
+        let spath = &to_singular(path);
         let path = &to_plural(path);
         for (resources, handler) in maps {
             let (sub_path, method) = resources.as_tuple();
-            let path = &Self::join_paths(path, sub_path);
+            let path =
+                &Self::join_paths(path, &sub_path.replace("id", &(spath.to_owned() + "_id")));
             self._handle(method, path, handler.clone());
         }
         self

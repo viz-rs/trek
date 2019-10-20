@@ -116,7 +116,7 @@ fn new_resources() {
         let r = mr.find(method, &path);
         assert!(r.is_some());
         let (h, p) = r.unwrap();
-        assert_eq!(p, [("id", "233")]);
+        assert_eq!(p, [("book_id", "233")]);
         let cx = Context::new(Arc::new(State {}), req, vec![]);
         let mut res = h.call(cx).await;
         assert_eq!(
