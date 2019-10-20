@@ -4,10 +4,16 @@ use std::collections::HashMap;
 use std::fmt;
 use std::sync::Arc;
 
+use futures::future::{BoxFuture, Future, FutureExt};
+use inflector::string::{pluralize::to_plural, singularize::to_singular};
+
 use trek_core::{
     handler::{into_box_dyn_handler, DynHandler, Handler},
     middleware::Middleware,
+    response::{IntoResponse, Response},
 };
+
+use crate::resources::{Resource, Resources};
 
 pub type Trees<Handler> = HashMap<Method, PathTree<Handler>>;
 
@@ -117,6 +123,34 @@ impl<Context> Router<Context> {
             .handle(Method::HEAD, path, handler.clone())
             .handle(Method::CONNECT, path, handler.clone())
             .handle(Method::TRACE, path, handler)
+    }
+
+    pub fn resource(
+        &mut self,
+        path: &str,
+        maps: &[(Resource, Box<DynHandler<Context>>)],
+    ) -> &mut Self {
+        let path = &to_singular(path);
+        for (resource, handler) in maps {
+            let (sub_path, method) = resource.as_tuple();
+            let path = &Self::join_paths(&path, sub_path);
+            self._handle(method, path, handler.clone());
+        }
+        self
+    }
+
+    pub fn resources(
+        &mut self,
+        path: &str,
+        maps: &[(Resources, Box<DynHandler<Context>>)],
+    ) -> &mut Self {
+        let path = &to_plural(path);
+        for (resources, handler) in maps {
+            let (sub_path, method) = resources.as_tuple();
+            let path = &Self::join_paths(path, sub_path);
+            self._handle(method, path, handler.clone());
+        }
+        self
     }
 
     pub fn find<'a>(
