@@ -1,15 +1,8 @@
-use futures::{
-    executor::block_on, future::ready, future::BoxFuture, future::Future, stream::TryStreamExt,
-};
-use http::Method;
+use futures::{executor::block_on, future::ready, future::Future, stream::TryStreamExt};
 use hyper::Body;
 use std::sync::Arc;
 use trek_core::context::Context;
-use trek_core::{
-    handler::{into_box_dyn_handler, DynHandler, Handler},
-    middleware::Middleware,
-    response::{IntoResponse, Response},
-};
+use trek_core::handler::into_box_dyn_handler;
 use trek_router::resources::{Resource, Resources};
 use trek_router::router::Router;
 
@@ -29,8 +22,6 @@ fn new_resources() {
             async { String::from("show: geocoder") }
         }
     }
-
-    struct Book {}
 
     async fn book_new(_: Context<State>) -> String {
         String::from("new: book")
@@ -71,10 +62,10 @@ fn new_resources() {
         let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, vec![]);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "show: geocoder",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -93,10 +84,10 @@ fn new_resources() {
         let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, vec![]);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "new: geocoder",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -115,10 +106,10 @@ fn new_resources() {
         let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, [("book_id", "233")]);
-        let cx = Context::new(Arc::new(State {}), req, vec![]);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "show: book",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -137,10 +128,10 @@ fn new_resources() {
         let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, vec![]);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "new: book",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()

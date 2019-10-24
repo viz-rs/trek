@@ -13,14 +13,14 @@ use crate::response::Response;
 use futures::future::BoxFuture;
 
 pub trait Middleware<Context>: Send + Sync + 'static {
-    fn call(&self, cx: Context) -> BoxFuture<'static, Response>;
+    fn call<'a>(&self, cx: Context) -> BoxFuture<'a, Response>;
 }
 
 impl<Context, F> Middleware<Context> for F
 where
     F: Send + Sync + 'static + Fn(Context) -> BoxFuture<'static, Response>,
 {
-    fn call(&self, cx: Context) -> BoxFuture<'static, Response> {
+    fn call<'a>(&self, cx: Context) -> BoxFuture<'a, Response> {
         (self)(cx)
     }
 }

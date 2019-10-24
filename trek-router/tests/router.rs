@@ -65,10 +65,10 @@ fn new_router() {
         let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, vec![]);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "home",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -87,10 +87,10 @@ fn new_router() {
         let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, vec![]);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "v1 login",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -99,23 +99,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("POST")
-                .uri("https://crates.io/v2/submit")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("POST")
+            .uri("https://crates.io/v2/submit")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "1",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -124,23 +121,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("GET")
-                .uri("https://crates.io/foo")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("GET")
+            .uri("https://crates.io/foo")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "3",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -149,23 +143,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("POST")
-                .uri("https://crates.io/bar")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("POST")
+            .uri("https://crates.io/bar")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "4",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -174,23 +165,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("DELETE")
-                .uri("https://crates.io/baz")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("DELETE")
+            .uri("https://crates.io/baz")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "5",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -199,23 +187,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("HEAD")
-                .uri("https://crates.io/admin")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("HEAD")
+            .uri("https://crates.io/admin")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "6",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -224,23 +209,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("OPTIONS")
-                .uri("https://crates.io/admin")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("OPTIONS")
+            .uri("https://crates.io/admin")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let mut res = h.call(cx).await;
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let mut res = cx.next().await;
         assert_eq!(
             "6",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -249,23 +231,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("GET")
-                .uri("https://crates.io/v1/users")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("GET")
+            .uri("https://crates.io/v1/users")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
         assert_eq!(p, []);
-        let mut res = h.call(cx).await;
+        let mut res = cx.next().await;
         assert_eq!(
             "get users",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -274,23 +253,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("GET")
-                .uri("https://crates.io/v1/users/fundon")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("GET")
+            .uri("https://crates.io/v1/users/fundon")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
         assert_eq!(p, [("id", "fundon")]);
-        let mut res = h.call(cx).await;
+        let mut res = cx.next().await;
         assert_eq!(
             "get users :id",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
@@ -299,23 +275,20 @@ fn new_router() {
 
     let mr = router.clone();
     block_on(async move {
-        let cx = Context::new(
-            Arc::new(State {}),
-            hyper::Request::builder()
-                .method("POST")
-                .uri("https://crates.io/v1/users/fundon")
-                .header("Content-Type", "application/json")
-                .body(Body::empty())
-                .unwrap(),
-            vec![],
-        );
-        let method = cx.method().to_owned();
-        let path = cx.uri().path().to_owned();
+        let req = hyper::Request::builder()
+            .method("POST")
+            .uri("https://crates.io/v1/users/fundon")
+            .header("Content-Type", "application/json")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
         let r = mr.find(method, &path);
         assert!(r.is_some());
-        let (h, p) = r.unwrap();
+        let (m, p) = r.unwrap();
+        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
         assert_eq!(p, [("id", "fundon")]);
-        let mut res = h.call(cx).await;
+        let mut res = cx.next().await;
         assert_eq!(
             "update users :id",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()

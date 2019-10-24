@@ -31,7 +31,7 @@ fn context() {
     struct M0 {}
 
     impl Middleware<Context<State>> for M0 {
-        fn call(&self, cx: Context<State>) -> BoxFuture<'static, Response> {
+        fn call<'a>(&self, cx: Context<State>) -> BoxFuture<'a, Response> {
             Box::pin(async move {
                 let mut res = cx.next().await;
 

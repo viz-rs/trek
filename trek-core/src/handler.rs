@@ -67,6 +67,15 @@ where
     Context: Send + 'static,
 {
     let f = into_box_dyn_handler(f);
+    Box::new(move |cx| f.call(cx).boxed())
+}
+
+pub fn box_dyn_handler_into_middleware<Context>(
+    f: Box<DynHandler<Context>>,
+) -> impl Middleware<Context>
+where
+    Context: Send + 'static,
+{
     Box::new(move |cx| f.call(cx))
 }
 

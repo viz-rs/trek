@@ -141,8 +141,6 @@ impl<State: 'static> Context<State> {
         Ok(serde_qs::from_str(query).map_err(|_| ErrorKind::InvalidData)?)
     }
 
-    pub fn param(&self) {}
-
     /// `application/x-www-form-urlencoded`
     pub async fn form<T: serde::de::DeserializeOwned>(&mut self) -> Result<T> {
         let body = self.bytes().await?;
@@ -172,12 +170,13 @@ impl<State: 'static> Context<State> {
 
     pub fn cookies(&self) {}
 
+    pub fn param(&self) {}
+
     // generate url
     pub fn url_for(&self) {}
 
     /// Next middleare
-    /// TODO: use `'a` lifetime for `BoxFuture<'a, Response>`
-    pub fn next(mut self) -> BoxFuture<'static, Response> {
+    pub fn next<'a>(mut self) -> BoxFuture<'a, Response> {
         if self.handlers.is_empty() {
             Box::pin(async { hyper::Response::new(Body::empty()) })
         } else {

@@ -19,7 +19,6 @@ impl Resource {
             Self::Delete => ("", Method::DELETE),
             Self::Edit => ("edit", Method::GET),
             Self::New => ("new", Method::GET),
-            _ => unimplemented!(),
         }
     }
 }
@@ -45,7 +44,6 @@ impl Resources {
             Self::Update(method) => (":id", method.to_owned()),
             Self::Delete => (":id", Method::DELETE),
             Self::Edit => (":id/edit", Method::GET),
-            _ => unimplemented!(),
         }
     }
 }

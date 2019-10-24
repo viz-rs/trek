@@ -4,13 +4,11 @@ use std::collections::HashMap;
 use std::fmt;
 use std::sync::Arc;
 
-use futures::future::{BoxFuture, Future, FutureExt};
 use inflector::string::{pluralize::to_plural, singularize::to_singular};
 
 use trek_core::{
-    handler::{into_box_dyn_handler, DynHandler, Handler},
+    handler::{box_dyn_handler_into_middleware, into_box_dyn_handler, DynHandler, Handler},
     middleware::Middleware,
-    response::{IntoResponse, Response},
 };
 
 use crate::resources::{Resource, Resources};
@@ -19,11 +17,12 @@ pub type Trees<Handler> = HashMap<Method, PathTree<Handler>>;
 
 pub struct Router<Context> {
     path: String,
-    trees: Trees<Box<DynHandler<Context>>>,
+    // trees: Trees<Box<DynHandler<Context>>>,
+    trees: Trees<Vec<Arc<dyn Middleware<Context>>>>,
     middleware: Vec<Arc<dyn Middleware<Context>>>,
 }
 
-impl<Context> Router<Context> {
+impl<Context: Send + 'static> Router<Context> {
     pub fn new() -> Self {
         Self {
             path: "/".to_owned(),
@@ -34,6 +33,11 @@ impl<Context> Router<Context> {
 
     pub fn middleware(&mut self, m: impl Middleware<Context>) -> &mut Self {
         self.middleware.push(Arc::new(m));
+        self
+    }
+
+    pub fn clear_middleware(&mut self) -> &mut Self {
+        self.middleware.clear();
         self
     }
 
@@ -61,10 +65,13 @@ impl<Context> Router<Context> {
         handler: Box<DynHandler<Context>>,
     ) -> &mut Self {
         let path = &Self::join_paths(&self.path, path);
+        let mut middleware = self.middleware.clone();
+        middleware.push(Arc::new(box_dyn_handler_into_middleware(handler)));
         self.trees
             .entry(method)
             .or_insert_with(PathTree::new)
-            .insert(path, handler);
+            // .insert(path, handler);
+            .insert(path, middleware);
         self
     }
 
@@ -159,7 +166,11 @@ impl<Context> Router<Context> {
         &'a self,
         method: Method,
         path: &'a str,
-    ) -> Option<(&'a Box<DynHandler<Context>>, Vec<(&'a str, &'a str)>)> {
+    ) -> Option<(
+        // &'a Box<DynHandler<Context>>,
+        &'a Vec<Arc<dyn Middleware<Context>>>,
+        Vec<(&'a str, &'a str)>,
+    )> {
         let tree = self.trees.get(&method)?;
         tree.find(path)
     }
