@@ -7,7 +7,7 @@
 //!     * https://api.rocket.rs/v0.4/src/rocket/handler.rs.html#134-146
 //!     * https://github.com/seanmonstar/warp/blob/master/src/generic.rs
 
-use futures::future::{BoxFuture, Future, FutureExt};
+use futures::future::{BoxFuture, Future};
 
 use crate::middleware::Middleware;
 use crate::response::{IntoResponse, Response};
@@ -59,7 +59,7 @@ impl<Context> Clone for Box<DynHandler<Context>> {
 }
 
 pub fn into_box_dyn_handler<Context>(f: impl Handler<Context> + Clone) -> Box<DynHandler<Context>> {
-    Box::new(move |cx| f.call(cx).boxed())
+    Box::new(move |cx| f.call(cx))
 }
 
 pub fn into_middleware<Context>(f: impl Handler<Context> + Clone) -> impl Middleware<Context>
@@ -67,7 +67,7 @@ where
     Context: Send + 'static,
 {
     let f = into_box_dyn_handler(f);
-    Box::new(move |cx| f.call(cx).boxed())
+    Box::new(move |cx| f.call(cx))
 }
 
 pub fn box_dyn_handler_into_middleware<Context>(
