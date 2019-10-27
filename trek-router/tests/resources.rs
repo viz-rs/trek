@@ -3,6 +3,7 @@ use hyper::Body;
 use std::sync::Arc;
 use trek_core::context::Context;
 use trek_core::handler::into_box_dyn_handler;
+use trek_core::parameters::Parameters;
 use trek_router::resources::{Resource, Resources};
 use trek_router::router::Router;
 
@@ -64,7 +65,14 @@ fn new_resources() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "show: geocoder",
@@ -86,7 +94,14 @@ fn new_resources() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "new: geocoder",
@@ -108,7 +123,16 @@ fn new_resources() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, [("book_id", "233")]);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
+        let s: u8 = cx.params().unwrap();
+        assert_eq!(s, 233);
         let mut res = cx.next().await;
         assert_eq!(
             "show: book",
@@ -130,7 +154,14 @@ fn new_resources() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "new: book",

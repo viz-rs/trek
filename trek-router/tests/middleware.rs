@@ -7,7 +7,7 @@ use hyper::{Body, Method};
 use std::sync::Arc;
 use trek_core::{
     context::Context, handler::into_box_dyn_handler, handler::into_middleware,
-    middleware::Middleware, response::Response,
+    middleware::Middleware, parameters::Parameters, response::Response,
 };
 use trek_router::{
     resources::{Resource, Resources},
@@ -64,7 +64,10 @@ fn new_middleware() {
         r.middleware(Middleware_B {}).get("", |_| async { "users" });
         r.clear_middleware()
             .middleware(Middleware_C {})
-            .get("/", |_| async { "users index" });
+            .get("/", |_| async { "users index" })
+            .get("/:name", |cx: Context<State>| {
+                async move { cx.params::<String>().unwrap() }
+            });
     });
 
     let router = Arc::new(router);
@@ -82,7 +85,14 @@ fn new_middleware() {
         assert!(route.is_some());
         let (m, p) = route.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "home",
@@ -103,7 +113,14 @@ fn new_middleware() {
         assert!(route.is_some());
         let (m, p) = route.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "users",
@@ -124,10 +141,45 @@ fn new_middleware() {
         assert!(route.is_some());
         let (m, p) = route.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "users index",
+            String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
+        );
+    });
+
+    let current_router = router.clone();
+    block_on(async move {
+        let req = hyper::Request::builder()
+            .method("GET")
+            .uri("https://crates.io/users/crab")
+            .body(Body::empty())
+            .unwrap();
+        let method = req.method().to_owned();
+        let path = req.uri().path().to_owned();
+        let route = current_router.find(method, &path);
+        assert!(route.is_some());
+        let (m, p) = route.unwrap();
+        assert_eq!(p, [("name", "crab")]);
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
+        let mut res = cx.next().await;
+        assert_eq!(
+            "crab",
             String::from_utf8(res.body_mut().try_concat().await.unwrap().to_vec()).unwrap()
         );
     });

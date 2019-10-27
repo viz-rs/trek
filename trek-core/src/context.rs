@@ -11,6 +11,7 @@ use std::{
 };
 
 use crate::middleware::Middleware;
+use crate::parameters::Parameters;
 use crate::request::Request;
 use crate::response::Response;
 
@@ -18,6 +19,7 @@ use crate::response::Response;
 pub struct Context<State> {
     state: Arc<State>,
     request: Request,
+    params: Vec<(String, String)>,
     handlers: Vec<Arc<dyn Middleware<Self>>>,
 }
 
@@ -26,11 +28,13 @@ impl<State: 'static> Context<State> {
     pub fn new(
         state: Arc<State>,
         request: Request,
+        params: Vec<(String, String)>,
         handlers: Vec<Arc<dyn Middleware<Self>>>,
     ) -> Self {
         Self {
             state,
             request,
+            params,
             handlers,
         }
     }
@@ -168,9 +172,18 @@ impl<State: 'static> Context<State> {
         Ok(Multipart::with_body(self.take_body(), boundary))
     }
 
-    pub fn cookies(&self) {}
+    pub fn params<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
+        Ok(Parameters::new(
+            self.params
+                .iter()
+                .map(|(k, v)| (k.as_str(), v.as_str()))
+                .collect(),
+        )
+        .params()
+        .map_err(|_| ErrorKind::InvalidData)?)
+    }
 
-    pub fn param(&self) {}
+    pub fn cookies(&self) {}
 
     // generate url
     pub fn url_for(&self) {}

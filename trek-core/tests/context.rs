@@ -10,6 +10,7 @@ use std::sync::Arc;
 use trek_core::context::Context;
 use trek_core::handler::*;
 use trek_core::middleware::*;
+use trek_core::parameters::Parameters;
 use trek_core::response::*;
 
 #[test]
@@ -67,6 +68,7 @@ fn context() {
                 .unwrap(),
             ))
             .unwrap(),
+        vec![],
         // vec![],
         // vec![Arc::new(into_middleware(handler))],
         vec![Arc::new(M0 {}), Arc::new(into_middleware(handler_async))],

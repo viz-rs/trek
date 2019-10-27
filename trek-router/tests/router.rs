@@ -67,7 +67,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "home",
@@ -89,7 +96,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "v1 login",
@@ -111,7 +125,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "1",
@@ -133,7 +154,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "3",
@@ -155,7 +183,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "4",
@@ -177,7 +212,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "5",
@@ -199,7 +241,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "6",
@@ -221,7 +270,14 @@ fn new_router() {
         assert!(r.is_some());
         let (m, p) = r.unwrap();
         assert_eq!(p, []);
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         let mut res = cx.next().await;
         assert_eq!(
             "6",
@@ -242,7 +298,14 @@ fn new_router() {
         let r = mr.find(method, &path);
         assert!(r.is_some());
         let (m, p) = r.unwrap();
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         assert_eq!(p, []);
         let mut res = cx.next().await;
         assert_eq!(
@@ -264,7 +327,14 @@ fn new_router() {
         let r = mr.find(method, &path);
         assert!(r.is_some());
         let (m, p) = r.unwrap();
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         assert_eq!(p, [("id", "fundon")]);
         let mut res = cx.next().await;
         assert_eq!(
@@ -286,8 +356,17 @@ fn new_router() {
         let r = mr.find(method, &path);
         assert!(r.is_some());
         let (m, p) = r.unwrap();
-        let cx = Context::new(Arc::new(State {}), req, m.to_vec());
+        let cx = Context::new(
+            Arc::new(State {}),
+            req,
+            p.iter()
+                .map(|(k, v)| (k.to_string(), v.to_string()))
+                .collect(),
+            m.to_vec(),
+        );
         assert_eq!(p, [("id", "fundon")]);
+        let s: String = cx.params().unwrap();
+        assert_eq!(s, "fundon");
         let mut res = cx.next().await;
         assert_eq!(
             "update users :id",
