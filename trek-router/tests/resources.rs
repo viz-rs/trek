@@ -3,7 +3,6 @@ use hyper::Body;
 use std::sync::Arc;
 use trek_core::context::Context;
 use trek_core::handler::into_box_dyn_handler;
-use trek_core::parameters::Parameters;
 use trek_router::resources::{Resource, Resources};
 use trek_router::router::Router;
 

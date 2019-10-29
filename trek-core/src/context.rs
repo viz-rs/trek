@@ -1,3 +1,4 @@
+use cookie::{Cookie, CookieJar, ParseError};
 use futures::future::BoxFuture;
 use http::Extensions;
 use hyper::{
@@ -6,10 +7,13 @@ use hyper::{
 };
 use multipart_async::server::Multipart;
 use std::{
+    fmt,
     io::{Error, ErrorKind, Result},
     sync::Arc,
+    sync::RwLock,
 };
 
+use crate::cookies::Cookies;
 use crate::middleware::Middleware;
 use crate::parameters::Parameters;
 use crate::request::Request;
@@ -183,7 +187,15 @@ impl<State: 'static> Context<State> {
         .map_err(|_| ErrorKind::InvalidData)?)
     }
 
-    pub fn cookies(&self) {}
+    // all cookies
+    pub fn cookies(&self) -> Option<&Cookies> {
+        // TODO: need parse all cookies from header
+        self.extensions().get::<Cookies>()
+    }
+
+    pub fn cookie(&self, name: &str) -> Option<Cookie<'static>> {
+        self.cookies()?.0.read().unwrap().get(name).cloned()
+    }
 
     // generate url
     pub fn url_for(&self) {}
@@ -195,5 +207,11 @@ impl<State: 'static> Context<State> {
         } else {
             self.handlers.remove(0).call(self)
         }
+    }
+}
+
+impl<State> fmt::Debug for Context<State> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_struct("Context").finish()
     }
 }

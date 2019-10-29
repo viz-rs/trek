@@ -1,8 +1,6 @@
 use http::Method;
 use path_tree::PathTree;
-use std::collections::HashMap;
-use std::fmt;
-use std::sync::Arc;
+use std::{collections::HashMap, fmt, sync::Arc};
 
 use inflector::string::{pluralize::to_plural, singularize::to_singular};
 

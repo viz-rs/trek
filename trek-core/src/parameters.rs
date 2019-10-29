@@ -201,10 +201,10 @@ impl<'de> Deserializer<'de> for Parameters<'de> {
     parse_single_value!(deserialize_u64, visit_u64, "u64");
     parse_single_value!(deserialize_f32, visit_f32, "f32");
     parse_single_value!(deserialize_f64, visit_f64, "f64");
+    parse_single_value!(deserialize_str, visit_string, "str");
     parse_single_value!(deserialize_string, visit_string, "String");
     parse_single_value!(deserialize_byte_buf, visit_string, "String");
     parse_single_value!(deserialize_char, visit_char, "char");
-    parse_single_value!(deserialize_str, visit_string, "str");
 
     forward_to_deserialize_any! {
         bytes option ignored_any identifier
