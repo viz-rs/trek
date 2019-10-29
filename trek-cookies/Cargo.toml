@@ -1,0 +1,18 @@
+[package]
+name = "trek-cookies"
+version = "0.1.0"
+authors = ["Fangdun Cai <cfddream@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+http = "0.1.19"
+futures-preview = "=0.3.0-alpha.19"
+hyper = { version = "0.13.0-alpha.4", features = ["unstable-stream"] }
+cookie = { version = "0.12", features = ["percent-encode"] }
+trek-core = { path = "../trek-core" }
+
+[dev-dependencies]
+hyper = { version = "0.13.0-alpha.4", features = ["unstable-stream"] }
+trek-router = { path = "../trek-router" }

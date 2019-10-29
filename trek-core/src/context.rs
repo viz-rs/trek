@@ -1,4 +1,3 @@
-use cookie::{Cookie, CookieJar, ParseError};
 use futures::future::BoxFuture;
 use http::Extensions;
 use hyper::{
@@ -10,10 +9,8 @@ use std::{
     fmt,
     io::{Error, ErrorKind, Result},
     sync::Arc,
-    sync::RwLock,
 };
 
-use crate::cookies::Cookies;
 use crate::middleware::Middleware;
 use crate::parameters::Parameters;
 use crate::request::Request;
@@ -187,18 +184,8 @@ impl<State: 'static> Context<State> {
         .map_err(|_| ErrorKind::InvalidData)?)
     }
 
-    // all cookies
-    pub fn cookies(&self) -> Option<&Cookies> {
-        // TODO: need parse all cookies from header
-        self.extensions().get::<Cookies>()
-    }
-
-    pub fn cookie(&self, name: &str) -> Option<Cookie<'static>> {
-        self.cookies()?.0.read().unwrap().get(name).cloned()
-    }
-
     // generate url
-    pub fn url_for(&self) {}
+    // pub fn url_for(&self) {}
 
     /// Next middleare
     pub fn next<'a>(mut self) -> BoxFuture<'a, Response> {

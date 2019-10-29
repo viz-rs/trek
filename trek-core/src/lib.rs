@@ -19,5 +19,3 @@ pub mod middleware;
 pub mod handler;
 
 pub mod parameters;
-
-pub mod cookies;

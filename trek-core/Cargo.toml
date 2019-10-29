@@ -13,7 +13,6 @@ serde = { version = "1.0.101", features = ["derive"] }
 serde_json = "1.0.41"
 serde_qs = "0.5.0"
 serde_urlencoded = "0.6.1"
-cookie = { version = "0.12", features = ["percent-encode"] }
 futures-preview = "=0.3.0-alpha.19"
 multipart-async = { git = "https://github.com/abonander/multipart-async.git", rev = "54441275", features = ["server", "hyper"], default-features = false }
 

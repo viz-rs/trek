@@ -2,5 +2,6 @@
 members = [
     "trek",
     "trek-core",
-    "trek-router"
+    "trek-router",
+    "trek-cookies"
 ]
