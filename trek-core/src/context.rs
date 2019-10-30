@@ -180,7 +180,7 @@ impl<State: 'static> Context<State> {
                 .map(|(k, v)| (k.as_str(), v.as_str()))
                 .collect(),
         )
-        .params()
+        .parse()
         .map_err(|_| ErrorKind::InvalidData)?)
     }
 

@@ -58,7 +58,7 @@ impl<'de> Parameters<'de> {
         Self { index: 0, items }
     }
 
-    pub fn params<T>(self) -> Result<T, ValueError>
+    pub fn parse<T>(self) -> Result<T, ValueError>
     where
         T: DeserializeOwned,
     {

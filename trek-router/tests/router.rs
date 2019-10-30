@@ -49,7 +49,7 @@ fn new_router() {
             a.any("", |_| async { "6" });
         });
 
-    dbg!(&router);
+    // dbg!(&router);
 
     let router = Arc::new(router);
 
