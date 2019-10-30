@@ -1,19 +1,9 @@
-use futures::{
-    executor::block_on,
-    future::{ready, BoxFuture, Future},
-    stream::TryStreamExt,
-};
-use hyper::{Body, Method};
+use futures::{executor::block_on, stream::TryStreamExt};
+use hyper::Body;
 use std::sync::Arc;
 use trek_cookies::{ContextExt, Cookie, CookiesMiddleware};
-use trek_core::{
-    context::Context, handler::into_box_dyn_handler, handler::into_middleware,
-    middleware::Middleware, parameters::Parameters, response::Response,
-};
-use trek_router::{
-    resources::{Resource, Resources},
-    router::Router,
-};
+use trek_core::context::Context;
+use trek_router::router::Router;
 
 #[test]
 fn new_cookies() {

@@ -58,15 +58,15 @@ fn middleware_example() {
         })
     }
 
-    fn h(cx: Context<'_>) -> impl Future<Output = String> {
+    fn h(_cx: Context<'_>) -> impl Future<Output = String> {
         println!("handler: {} {}", "h", "handler");
         async { String::from("trek") }
     }
 
-    async fn ha<'r>(cx: Context<'r>) -> String {
-        println!("handler: {} {}", "h", "handler");
-        String::from("trek")
-    }
+    // async fn ha<'r>(cx: Context<'r>) -> String {
+    //     println!("handler: {} {}", "h", "handler");
+    //     String::from("trek")
+    // }
 
     fn make<Output, Fut>(
         h: impl Fn(Context<'_>) -> Fut + 'static + Send + Sync,

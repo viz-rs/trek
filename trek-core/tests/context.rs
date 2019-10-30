@@ -1,4 +1,4 @@
-use futures::future::{ready, BoxFuture, Future};
+use futures::future::BoxFuture;
 use futures::{
     executor::block_on,
     stream::{self, TryStreamExt},
@@ -10,7 +10,6 @@ use std::sync::Arc;
 use trek_core::context::Context;
 use trek_core::handler::*;
 use trek_core::middleware::*;
-use trek_core::parameters::Parameters;
 use trek_core::response::*;
 
 #[test]
@@ -49,10 +48,10 @@ fn context() {
         String::from("Star")
     }
 
-    fn handler(_: Context<State>) -> impl Future<Output = String> {
-        // async { String::from("Star") }
-        ready(String::from("Star"))
-    }
+    // fn handler(_: Context<State>) -> impl Future<Output = String> {
+    //     // async { String::from("Star") }
+    //     ready(String::from("Star"))
+    // }
 
     let mut cx = Context::new(
         Arc::new(State {}),

@@ -1,27 +1,17 @@
-use futures::{
-    executor::block_on,
-    future::{ready, BoxFuture, Future},
-    stream::TryStreamExt,
-};
-use hyper::{Body, Method};
+use futures::{executor::block_on, future::BoxFuture, stream::TryStreamExt};
+use hyper::Body;
 use std::sync::Arc;
-use trek_core::{
-    context::Context, handler::into_box_dyn_handler, handler::into_middleware,
-    middleware::Middleware, parameters::Parameters, response::Response,
-};
-use trek_router::{
-    resources::{Resource, Resources},
-    router::Router,
-};
+use trek_core::{context::Context, middleware::Middleware, response::Response};
+use trek_router::router::Router;
 
 #[test]
 fn new_middleware() {
     struct State {}
     let mut router = Router::<Context<State>>::new();
 
-    struct Middleware_A {}
+    struct MiddlewareA {}
 
-    impl Middleware<Context<State>> for Middleware_A {
+    impl Middleware<Context<State>> for MiddlewareA {
         fn call<'a>(&self, cx: Context<State>) -> BoxFuture<'a, Response> {
             Box::pin(async move {
                 println!("middleware: {}", "A in");
@@ -32,9 +22,9 @@ fn new_middleware() {
         }
     }
 
-    struct Middleware_B {}
+    struct MiddlewareB {}
 
-    impl Middleware<Context<State>> for Middleware_B {
+    impl Middleware<Context<State>> for MiddlewareB {
         fn call<'a>(&self, cx: Context<State>) -> BoxFuture<'a, Response> {
             Box::pin(async move {
                 println!("middleware: {}", "B in");
@@ -45,9 +35,9 @@ fn new_middleware() {
         }
     }
 
-    struct Middleware_C {}
+    struct MiddlewareC {}
 
-    impl Middleware<Context<State>> for Middleware_C {
+    impl Middleware<Context<State>> for MiddlewareC {
         fn call<'a>(&self, cx: Context<State>) -> BoxFuture<'a, Response> {
             Box::pin(async move {
                 println!("middleware: {}", "C in");
@@ -58,12 +48,12 @@ fn new_middleware() {
         }
     }
 
-    router.middleware(Middleware_A {});
+    router.middleware(MiddlewareA {});
 
     router.get("/", |_| async { "home" }).scope("/users", |r| {
-        r.middleware(Middleware_B {}).get("", |_| async { "users" });
+        r.middleware(MiddlewareB {}).get("", |_| async { "users" });
         r.clear_middleware()
-            .middleware(Middleware_C {})
+            .middleware(MiddlewareC {})
             .get("/", |_| async { "users index" })
             .get("/:name", |cx: Context<State>| {
                 async move { cx.params::<String>().unwrap() }
