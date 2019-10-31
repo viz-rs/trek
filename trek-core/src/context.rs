@@ -174,14 +174,9 @@ impl<State: 'static> Context<State> {
     }
 
     pub fn params<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
-        Ok(Parameters::new(
-            self.params
-                .iter()
-                .map(|(k, v)| (k.as_str(), v.as_str()))
-                .collect(),
-        )
-        .parse()
-        .map_err(|_| ErrorKind::InvalidData)?)
+        Ok(Parameters::from_vec_string(&self.params)
+            .parse()
+            .map_err(|_| ErrorKind::InvalidData)?)
     }
 
     // generate url

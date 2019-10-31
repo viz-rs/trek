@@ -64,6 +64,15 @@ impl<'de> Parameters<'de> {
     {
         Deserialize::deserialize(self)
     }
+
+    pub fn from_vec_string(items: &'de Vec<(String, String)>) -> Self {
+        Self::new(
+            items
+                .iter()
+                .map(|(k, v)| (k.as_str(), v.as_str()))
+                .collect(),
+        )
+    }
 }
 
 impl<'de> Deserializer<'de> for Parameters<'de> {
@@ -345,16 +354,14 @@ impl<'de> Deserializer<'de> for Value<'de> {
     where
         V: Visitor<'de>,
     {
-        // visitor.visit_borrowed_bytes(self.value.as_bytes())
-        visitor.visit_bytes(self.value.as_bytes())
+        visitor.visit_borrowed_bytes(self.value.as_bytes())
     }
 
     fn deserialize_str<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        // visitor.visit_borrowed_str(self.value)
-        visitor.visit_str(self.value)
+        visitor.visit_borrowed_str(self.value)
     }
 
     fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, Self::Error>
