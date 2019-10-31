@@ -1,5 +1,8 @@
+//! Resource enums.
+
 use http::Method;
 
+/// Resource
 #[derive(Debug)]
 pub enum Resource {
     Show,
@@ -15,7 +18,7 @@ impl Resource {
         match self {
             Self::Show => ("", Method::GET),
             Self::Create => ("", Method::POST),
-            Self::Update(method) => ("", method.to_owned()),
+            Self::Update(method) => ("", method.to_owned()), // PUT|PATCH
             Self::Delete => ("", Method::DELETE),
             Self::Edit => ("edit", Method::GET),
             Self::New => ("new", Method::GET),
@@ -23,6 +26,7 @@ impl Resource {
     }
 }
 
+/// Resources
 #[derive(Debug)]
 pub enum Resources {
     Index,
@@ -41,7 +45,7 @@ impl Resources {
             Self::Create => ("", Method::POST),
             Self::New => ("new", Method::GET),
             Self::Show => (":id", Method::GET),
-            Self::Update(method) => (":id", method.to_owned()),
+            Self::Update(method) => (":id", method.to_owned()), // PUT|PATCH
             Self::Delete => (":id", Method::DELETE),
             Self::Edit => (":id/edit", Method::GET),
         }

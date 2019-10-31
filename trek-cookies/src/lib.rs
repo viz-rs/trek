@@ -1,3 +1,11 @@
+#![deny(unsafe_code)]
+#![warn(
+    nonstandard_style,
+    rust_2018_idioms,
+    future_incompatible,
+    missing_debug_implementations
+)]
+
 use cookie::ParseError;
 pub use cookie::{Cookie, CookieJar};
 use futures::future::BoxFuture;
@@ -81,6 +89,7 @@ impl<State: Send + Sync + 'static> ContextExt for Context<State> {
     }
 }
 
+#[derive(Debug)]
 pub struct CookiesMiddleware {}
 
 impl<State: Send + Sync + 'static> Middleware<Context<State>> for CookiesMiddleware {

@@ -7,6 +7,12 @@ A web framework for Rust.
 [![Documentation](https://docs.rs/trek/badge.svg)](https://docs.rs/trek)
 ![License](https://img.shields.io/crates/l/trek.svg)
 
+## Hello Trek
+
+```rust
+
+```
+
 ## License
 
 This project is licensed under either of

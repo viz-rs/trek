@@ -1,5 +1,7 @@
 ## Routing
 
+### Example:
+
 ```rust
 async fn get_users(_: Context<State>) -> String {
     String::from("get users")

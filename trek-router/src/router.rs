@@ -1,6 +1,7 @@
+use fnv::FnvHashMap;
 use http::Method;
 use path_tree::PathTree;
-use std::{collections::HashMap, fmt, sync::Arc};
+use std::{fmt, sync::Arc};
 
 use inflector::string::{pluralize::to_plural, singularize::to_singular};
 
@@ -11,7 +12,7 @@ use trek_core::{
 
 use crate::resources::{Resource, Resources};
 
-pub type Trees<Handler> = HashMap<Method, PathTree<Handler>>;
+pub type Trees<Handler> = FnvHashMap<Method, PathTree<Handler>>;
 
 pub struct Router<Context> {
     path: String,
@@ -24,7 +25,7 @@ impl<Context: Send + 'static> Router<Context> {
     pub fn new() -> Self {
         Self {
             path: "/".to_owned(),
-            trees: Trees::new(),
+            trees: Trees::default(),
             middleware: Vec::new(),
         }
     }

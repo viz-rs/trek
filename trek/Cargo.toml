@@ -15,3 +15,7 @@ categories = [
 license = "MIT/Apache-2.0"
 
 [dependencies]
+hyper = { version = "0.13.0-alpha.4", features = ["unstable-stream", "runtime"] }
+tokio = { version = "0.2.0-alpha.6", default-features = false, features = ["rt-full"] }
+trek-core = { path = "../trek-core" }
+trek-router = { path = "../trek-router" }
