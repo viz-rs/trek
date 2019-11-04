@@ -57,6 +57,7 @@ where
     Box::new(move |cx| f.call(cx))
 }
 
+#[allow(dead_code)]
 pub fn into_middleware<Context>(f: impl Handler<Context> + Clone) -> impl Middleware<Context>
 where
     Context: Send + 'static,
