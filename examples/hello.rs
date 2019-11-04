@@ -1,8 +1,10 @@
 #[macro_use]
 extern crate log;
 
+use serde::{Deserialize, Serialize};
+
 use futures::future::BoxFuture;
-use trek::{into_box_dyn_handler, Context, Middleware, Resources, Response, Trek};
+use trek::{into_box_dyn_handler, json, Context, Middleware, Resources, Response, Trek};
 
 struct MiddlewareA {}
 struct MiddlewareB {}
@@ -29,6 +31,13 @@ impl<State: Sync + Send + 'static> Middleware<Context<State>> for MiddlewareB {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct UserInfo {
+    name: String,
+    repo: String,
+    id: u64,
+}
+
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
@@ -41,6 +50,12 @@ async fn main() {
         .get("/", |_| async { "hello" })
         .get("/rust", |_| async { "rust" })
         .get("/2018", |_| async { "2018" })
+        .get("/users/:name", |cx: Context<()>| {
+            async move { cx.params::<String>().unwrap() }
+        })
+        .get("/users/:name/repos/:repo/issues/:id", |cx: Context<()>| {
+            async move { json(&cx.params::<UserInfo>().unwrap()) }
+        })
         .scope("/users", |r| {
             r.resources(
                 "",

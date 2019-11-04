@@ -39,3 +39,8 @@ multipart-async = { git = "https://github.com/abonander/multipart-async.git", re
 
 [dev-dependencies]
 pretty_env_logger = "0.3.1"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1

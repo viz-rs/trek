@@ -22,10 +22,14 @@ pub use crate::engine::{
     middleware::Middleware,
     parameters::Parameters,
     request::Request,
-    response::{IntoResponse, Response},
+    response::{html, json, IntoResponse, Response},
 };
+
+#[doc(inline)]
 pub use crate::router::{
     resource::{Resource, Resources},
     router::Router,
 };
+
+#[doc(inline)]
 pub use crate::trek::Trek;
