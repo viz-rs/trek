@@ -50,19 +50,20 @@ async fn main() {
         .get("/", |_| async { "hello" })
         .get("/rust", |_| async { "rust" })
         .get("/2018", |_| async { "2018" })
-        .get("/users/:name", |cx: Context<()>| {
-            async move { cx.params::<String>().unwrap() }
-        })
         .resources(
             "/users",
             &[
                 (
                     Resources::Show,
-                    into_box_dyn_handler(|_| async { "users show" }),
+                    into_box_dyn_handler(|cx: Context<()>| {
+                        async move { "user show: ".to_owned() + &cx.params::<String>().unwrap() }
+                    }),
                 ),
                 (
                     Resources::Edit,
-                    into_box_dyn_handler(|_| async { "users edit" }),
+                    into_box_dyn_handler(|cx: Context<()>| {
+                        async move { "user edit: ".to_owned() + &cx.params::<String>().unwrap() }
+                    }),
                 ),
             ],
         )
