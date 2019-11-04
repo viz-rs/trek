@@ -2,8 +2,10 @@
 extern crate log;
 
 use futures::future::BoxFuture;
+use trek::into_box_dyn_handler;
 use trek::Context;
 use trek::Middleware;
+use trek::Resources;
 use trek::Response;
 use trek::Trek;
 
@@ -42,8 +44,23 @@ async fn main() {
         .middleware(MiddlewareA {})
         .middleware(MiddlewareB {})
         .get("/", |_| async { "hello" })
-        .get("rust", |_| async { "rust" })
-        .get("2018", |_| async { "2018" });
+        .get("/rust", |_| async { "rust" })
+        .get("/2018", |_| async { "2018" })
+        .scope("/users", |r| {
+            r.resources(
+                "",
+                &[
+                    (
+                        Resources::Show,
+                        into_box_dyn_handler(|_| async { "users show" }),
+                    ),
+                    (
+                        Resources::Edit,
+                        into_box_dyn_handler(|_| async { "users edit" }),
+                    ),
+                ],
+            );
+        });
 
     if let Err(e) = app.run("127.0.0.1:8000").await {
         error!("Error: {}", e);

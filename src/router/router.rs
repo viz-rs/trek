@@ -6,6 +6,7 @@ use std::{fmt, mem, sync::Arc};
 
 use crate::engine::handler::box_dyn_handler_into_middleware;
 use crate::engine::handler::into_box_dyn_handler;
+// use crate::engine::handler::into_middleware;
 use crate::engine::handler::BoxDynHandler;
 use crate::engine::handler::Handler;
 use crate::engine::middleware::Middleware;
@@ -14,7 +15,7 @@ use crate::router::resource::{Resource, Resources};
 pub type Trees<Context> = FnvHashMap<Method, PathTree<Vec<Arc<dyn Middleware<Context>>>>>;
 
 pub struct Router<Context> {
-    pub(crate) path: String,
+    path: String,
     trees: Trees<Context>,
     middleware: Vec<Arc<dyn Middleware<Context>>>,
 }
@@ -137,7 +138,12 @@ impl<Context: Send + 'static> Router<Context> {
         path: &str,
         maps: &[(Resource, BoxDynHandler<Context>)],
     ) -> &mut Self {
-        let path = &to_singular(path);
+        let s = if path.is_empty() {
+            self.path.rsplitn(2, '/').collect::<Vec<&str>>()[0]
+        } else {
+            path
+        };
+        let path = &to_singular(s);
         for (resource, handler) in maps {
             let (sub_path, method) = resource.as_tuple();
             let path = &Self::join_paths(&path, sub_path);
@@ -151,12 +157,18 @@ impl<Context: Send + 'static> Router<Context> {
         path: &str,
         maps: &[(Resources, BoxDynHandler<Context>)],
     ) -> &mut Self {
-        let spath = &to_singular(path);
-        let path = &to_plural(path);
+        let (p, s) = if path.is_empty() {
+            (
+                "".to_owned(),
+                self.path.rsplitn(2, '/').collect::<Vec<&str>>()[0],
+            )
+        } else {
+            (to_plural(path), path)
+        };
+        let spath = to_singular(s);
         for (resources, handler) in maps {
             let (sub_path, method) = resources.as_tuple();
-            let path =
-                &Self::join_paths(path, &sub_path.replace("id", &(spath.to_owned() + "_id")));
+            let path = &Self::join_paths(&p, &sub_path.replace("id", &(spath.to_owned() + "_id")));
             self._handle(path, method, handler.clone());
         }
         self

@@ -17,6 +17,7 @@ mod trek;
 
 #[doc(inline)]
 pub use self::engine::context::Context;
+pub use self::engine::handler::into_box_dyn_handler;
 pub use self::engine::handler::Handler;
 pub use self::engine::middleware::Middleware;
 pub use self::engine::response::Response;
