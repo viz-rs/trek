@@ -1,7 +1,6 @@
 use futures::future::{BoxFuture, Future};
 
-use crate::engine::middleware::Middleware;
-use crate::engine::response::{IntoResponse, Response};
+use crate::{IntoResponse, Middleware, Response};
 
 pub trait Handler<Context>: Cloneable<Context> + Send + Sync + 'static {
     type Fut: Future<Output = Response> + Send + 'static;

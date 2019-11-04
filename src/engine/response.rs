@@ -116,8 +116,8 @@ where
         Ok(v) => res
             .header(CONTENT_TYPE, "application/json")
             .body(Body::from(v)),
-        Err(_) => {
-            // log::error!("{}", e);
+        Err(e) => {
+            log::error!("{}", e);
             res.status(StatusCode::INTERNAL_SERVER_ERROR)
                 .body(Body::empty())
         }

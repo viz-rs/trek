@@ -2,12 +2,7 @@
 extern crate log;
 
 use futures::future::BoxFuture;
-use trek::into_box_dyn_handler;
-use trek::Context;
-use trek::Middleware;
-use trek::Resources;
-use trek::Response;
-use trek::Trek;
+use trek::{into_box_dyn_handler, Context, Middleware, Resources, Response, Trek};
 
 struct MiddlewareA {}
 struct MiddlewareB {}

@@ -11,18 +11,13 @@ use std::{
     sync::Arc,
 };
 
-// use crate::engine::handler::BoxDynHandler;
-use crate::engine::middleware::Middleware;
-use crate::engine::parameters::Parameters;
-use crate::engine::request::Request;
-use crate::engine::response::Response;
+use crate::{Middleware, Parameters, Request, Response};
 
 /// The `Context` of the current HTTP request.
 pub struct Context<State> {
     state: Arc<State>,
     request: Request,
     params: Vec<(String, String)>,
-    // handler: BoxDynHandler<Self>,
     middleware: Vec<Arc<dyn Middleware<Self>>>,
 }
 
@@ -32,14 +27,12 @@ impl<State: Send + Sync + 'static> Context<State> {
         state: Arc<State>,
         request: Request,
         params: Vec<(String, String)>,
-        // handler: BoxDynHandler<Self>,
         middleware: Vec<Arc<dyn Middleware<Self>>>,
     ) -> Self {
         Self {
             state,
             request,
             params,
-            // handler,
             middleware,
         }
     }
@@ -177,6 +170,12 @@ impl<State: Send + Sync + 'static> Context<State> {
         Ok(Multipart::with_body(self.take_body(), boundary))
     }
 
+    pub fn params<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
+        Ok(Parameters::from_vec_string(&self.params)
+            .parse()
+            .map_err(|_| ErrorKind::InvalidData)?)
+    }
+
     // generate url
     // pub fn url_for(&self) {}
 
@@ -189,12 +188,6 @@ impl<State: Send + Sync + 'static> Context<State> {
                 self.middleware.remove(0).call(self).await
             }
         })
-    }
-
-    pub fn params<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
-        Ok(Parameters::from_vec_string(&self.params)
-            .parse()
-            .map_err(|_| ErrorKind::InvalidData)?)
     }
 }
 

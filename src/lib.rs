@@ -16,13 +16,16 @@ mod router;
 mod trek;
 
 #[doc(inline)]
-pub use self::engine::context::Context;
-pub use self::engine::handler::into_box_dyn_handler;
-pub use self::engine::handler::Handler;
-pub use self::engine::middleware::Middleware;
-pub use self::engine::response::Response;
-pub use self::router::{
+pub use crate::engine::{
+    context::Context,
+    handler::{box_dyn_handler_into_middleware, into_box_dyn_handler, BoxDynHandler, Handler},
+    middleware::Middleware,
+    parameters::Parameters,
+    request::Request,
+    response::{IntoResponse, Response},
+};
+pub use crate::router::{
     resource::{Resource, Resources},
     router::Router,
 };
-pub use self::trek::Trek;
+pub use crate::trek::Trek;

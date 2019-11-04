@@ -4,13 +4,10 @@ use inflector::string::{pluralize::to_plural, singularize::to_singular};
 use path_tree::PathTree;
 use std::{fmt, mem, sync::Arc};
 
-use crate::engine::handler::box_dyn_handler_into_middleware;
-use crate::engine::handler::into_box_dyn_handler;
-// use crate::engine::handler::into_middleware;
-use crate::engine::handler::BoxDynHandler;
-use crate::engine::handler::Handler;
-use crate::engine::middleware::Middleware;
-use crate::router::resource::{Resource, Resources};
+use crate::{
+    box_dyn_handler_into_middleware, into_box_dyn_handler, BoxDynHandler, Handler, Middleware,
+    {Resource, Resources},
+};
 
 pub type Trees<Context> = FnvHashMap<Method, PathTree<Vec<Arc<dyn Middleware<Context>>>>>;
 
