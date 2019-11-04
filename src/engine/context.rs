@@ -181,13 +181,11 @@ impl<State: Send + Sync + 'static> Context<State> {
 
     /// Next middleare
     pub fn next<'a>(mut self) -> BoxFuture<'a, Response> {
-        Box::pin(async move {
-            if self.middleware.is_empty() {
-                hyper::Response::new(Body::empty())
-            } else {
-                self.middleware.remove(0).call(self).await
-            }
-        })
+        if self.middleware.is_empty() {
+            Box::pin(async { hyper::Response::new(Body::empty()) })
+        } else {
+            Box::pin(async move { self.middleware.remove(0).call(self).await })
+        }
     }
 }
 
