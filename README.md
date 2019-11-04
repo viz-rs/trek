@@ -30,6 +30,10 @@ async fn main() {
 }
 ```
 
+## Thanks
+
+Some ideas from [Tide], [Actix], [Rocket], [Wrap]. Thanks for these excellent projects.
+
 ## License
 
 This project is licensed under either of
@@ -51,3 +55,7 @@ of the [trek] package on [Crates.io].
 [hyper]: https://hyper.rs/
 [tokio]: https://tokio.rs/
 [async-std]: https://async.rs/
+[tide]: https://github.com/http-rs/tide
+[actix]: https://actix.rs/
+[rocket]: https://rocket.rs/
+[wrap]: https://github.com/seanmonstar/warp

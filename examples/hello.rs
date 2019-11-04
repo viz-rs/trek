@@ -69,7 +69,8 @@ async fn main() {
         )
         .get("/users/:name/repos/:repo/issues/:id", |cx: Context<()>| {
             async move { json(&cx.params::<UserInfo>().unwrap()) }
-        });
+        })
+        .any("/anywhere", |_| async { "Anywhere" });
 
     if let Err(e) = app.run("127.0.0.1:8000").await {
         error!("Error: {}", e);
