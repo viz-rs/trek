@@ -6,8 +6,7 @@ Fast, effective, minimalist web framework for Rust. Based on [hyper], [tokio] an
 
 <!-- [![Latest version](https://img.shields.io/crates/v/trek.svg)](https://crates.io/crates/trek) -->
 <!-- [![Documentation](https://docs.rs/trek/badge.svg)](https://docs.rs/trek) -->
-
-![License](https://img.shields.io/crates/l/trek.svg)
+<!-- ![License](https://img.shields.io/crates/l/trek.svg) -->
 
 ## Features
 
