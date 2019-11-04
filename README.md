@@ -30,10 +30,6 @@ async fn main() {
 }
 ```
 
-## Thanks
-
-Some ideas from [Tide], [Actix], [Rocket], [Wrap]. Thanks for these excellent projects.
-
 ## License
 
 This project is licensed under either of
@@ -44,6 +40,10 @@ This project is licensed under either of
   http://opensource.org/licenses/MIT)
 
 at your option.
+
+## Thanks
+
+Some ideas from [Tide], [Actix], [Rocket], [Wrap]. Thanks for these excellent projects.
 
 ## BTW
 
