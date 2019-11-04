@@ -5,8 +5,7 @@ use hyper::{
 };
 use std::sync::Arc;
 
-use crate::engine::context::Context;
-use crate::router::router::Router;
+use crate::{Context, Router};
 
 #[derive(Debug)]
 pub struct Trek<State> {
