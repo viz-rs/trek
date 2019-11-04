@@ -53,23 +53,21 @@ async fn main() {
         .get("/users/:name", |cx: Context<()>| {
             async move { cx.params::<String>().unwrap() }
         })
+        .resources(
+            "/users",
+            &[
+                (
+                    Resources::Show,
+                    into_box_dyn_handler(|_| async { "users show" }),
+                ),
+                (
+                    Resources::Edit,
+                    into_box_dyn_handler(|_| async { "users edit" }),
+                ),
+            ],
+        )
         .get("/users/:name/repos/:repo/issues/:id", |cx: Context<()>| {
             async move { json(&cx.params::<UserInfo>().unwrap()) }
-        })
-        .scope("/users", |r| {
-            r.resources(
-                "",
-                &[
-                    (
-                        Resources::Show,
-                        into_box_dyn_handler(|_| async { "users show" }),
-                    ),
-                    (
-                        Resources::Edit,
-                        into_box_dyn_handler(|_| async { "users edit" }),
-                    ),
-                ],
-            );
         });
 
     if let Err(e) = app.run("127.0.0.1:8000").await {
