@@ -1,6 +1,6 @@
 # Trek
 
-Fast, effective, minimalist web framework for Rust. Based on [hyper], [tokio] and [async-std].
+Fast, effective, minimalist web framework for Rust. Based on [Hyper], [Tokio] and [Async-std].
 
 [![Build Status](https://travis-ci.org/trek-rs/trek.svg?branch=master)](https://travis-ci.org/trek-rs/trek)
 
@@ -43,7 +43,7 @@ at your option.
 
 ## Thanks
 
-Some ideas from [Tide], [Actix], [Rocket], [Wrap]. Thanks for these excellent projects.
+Some ideas from [Tide], [Actix], [Rocket], [Wrap], [Phoenix], [Echo], [Gin]. Thanks for these excellent projects.
 
 ## BTW
 
@@ -59,3 +59,6 @@ of the [trek] package on [Crates.io].
 [actix]: https://actix.rs/
 [rocket]: https://rocket.rs/
 [wrap]: https://github.com/seanmonstar/warp
+[phoenix]: https://phoenixframework.org/
+[echo]: https://echo.labstack.com/
+[gin]: https://gin-gonic.com/
