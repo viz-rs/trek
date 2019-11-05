@@ -65,7 +65,7 @@ impl<'de> Parameters<'de> {
         Deserialize::deserialize(self)
     }
 
-    pub fn from_vec_string(items: &'de Vec<(String, String)>) -> Self {
+    pub fn from_vec_string(items: &'de [(String, String)]) -> Self {
         Self::new(
             items
                 .iter()

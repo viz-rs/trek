@@ -12,12 +12,20 @@ mod resource;
 
 pub use resource::{Resource, Resources};
 
-pub type Trees<Context> = FnvHashMap<Method, PathTree<Vec<Arc<dyn Middleware<Context>>>>>;
+pub(crate) type VecMiddleware<Context> = Vec<Arc<dyn Middleware<Context>>>;
+
+pub(crate) type Trees<Context> = FnvHashMap<Method, PathTree<VecMiddleware<Context>>>;
 
 pub struct Router<Context> {
     path: String,
     trees: Trees<Context>,
-    pub(crate) middleware: Vec<Arc<dyn Middleware<Context>>>,
+    pub(crate) middleware: VecMiddleware<Context>,
+}
+
+impl<Context: Send + 'static> Default for Router<Context> {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<Context: Send + 'static> Router<Context> {
@@ -176,14 +184,12 @@ impl<Context: Send + 'static> Router<Context> {
         self
     }
 
+    #[allow(clippy::type_complexity)]
     pub fn find<'a>(
         &'a self,
         path: &'a str,
         method: Method,
-    ) -> Option<(
-        &'a Vec<Arc<dyn Middleware<Context>>>,
-        Vec<(&'a str, &'a str)>,
-    )> {
+    ) -> Option<(&'a VecMiddleware<Context>, Vec<(&'a str, &'a str)>)> {
         let tree = self.trees.get(&method)?;
         tree.find(path)
     }

@@ -42,7 +42,7 @@ impl<State: Default + Send + Sync + 'static> Trek<State> {
         let state = Arc::new(State::default());
         let router = Arc::new(self.router);
 
-        let fut = builder
+        Ok(builder
             .serve(make_service_fn(move |_socket| {
                 let state = state.clone();
                 let router = router.clone();
@@ -59,7 +59,7 @@ impl<State: Default + Send + Sync + 'static> Trek<State> {
                                     state,
                                     req,
                                     p.iter()
-                                        .map(|(k, v)| (k.to_string(), v.to_string()))
+                                        .map(|(k, v)| ((*k).to_string(), (*v).to_string()))
                                         .collect(),
                                     m.to_owned(),
                                 );
@@ -78,9 +78,7 @@ impl<State: Default + Send + Sync + 'static> Trek<State> {
             .map_err(|e| {
                 error!("server error: {}", e);
                 std::io::Error::new(std::io::ErrorKind::Other, e)
-            })?;
-
-        Ok(fut)
+            })?)
     }
 }
 

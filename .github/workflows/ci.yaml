@@ -1,17 +1,13 @@
 name: CI
 
-on:
-  pull_request:
-  push:
-    branches:
-      - future
+on: [push, pull_request]
 
 env:
   RUSTFLAGS: -Dwarnings
 
 jobs:
-  build_and_test:
-    name: Build and test
+  build:
+    name: ${{ matrix.kind }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
