@@ -2,8 +2,9 @@
 
 Fast, effective, minimalist web framework for Rust. Based on [Hyper], [Tokio] and [Async-std].
 
-[![Build Status](https://travis-ci.org/trek-rs/trek.svg?branch=master)](https://travis-ci.org/trek-rs/trek)
+[![Build Status](https://github.com/trek-rs/trek/workflows/ci/badge.svg?branch=future)](https://github.com/trek-rs/trek/actions)
 
+<!-- [![Build Status](https://travis-ci.org/trek-rs/trek.svg?branch=master)](https://travis-ci.org/trek-rs/trek) -->
 <!-- [![Latest version](https://img.shields.io/crates/v/trek.svg)](https://crates.io/crates/trek) -->
 <!-- [![Documentation](https://docs.rs/trek/badge.svg)](https://docs.rs/trek) -->
 <!-- ![License](https://img.shields.io/crates/l/trek.svg) -->
