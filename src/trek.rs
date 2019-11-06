@@ -1,11 +1,11 @@
 use hyper::{
     server::Server,
     service::{make_service_fn, service_fn},
-    Body, Error, Response,
+    Error,
 };
 use std::sync::Arc;
 
-use crate::{Context, Router};
+use crate::{middleware::NotFound, Context, Router};
 
 #[derive(Debug)]
 pub struct Trek<State> {
@@ -41,36 +41,36 @@ impl<State: Default + Send + Sync + 'static> Trek<State> {
 
         let state = Arc::new(State::default());
         let router = Arc::new(self.router);
+        let not_found = Arc::new(NotFound::new());
 
         Ok(builder
             .serve(make_service_fn(move |_socket| {
                 let state = state.clone();
                 let router = router.clone();
+                let not_found = not_found.clone();
 
                 async move {
                     Ok::<_, Error>(service_fn(move |req| {
                         let state = state.clone();
                         let path = req.uri().path().to_owned();
                         let method = req.method().to_owned();
+                        let middleware = router.middleware.clone();
+                        let mut cx = Context::new(state, req, vec![], middleware.clone());
 
-                        let fut = match router.find(&path, method) {
+                        match router.find(&path, method) {
                             Some((m, p)) => {
-                                let cx = Context::new(
-                                    state,
-                                    req,
-                                    p.iter()
-                                        .map(|(k, v)| ((*k).to_string(), (*v).to_string()))
-                                        .collect(),
-                                    m.to_owned(),
-                                );
-                                cx.next()
+                                cx.middleware.append(&mut m.clone());
+                                cx.params = p
+                                    .iter()
+                                    .map(|(k, v)| ((*k).to_string(), (*v).to_string()))
+                                    .collect();
                             }
-                            None => Box::pin(async {
-                                Response::builder().status(404).body(Body::empty()).unwrap()
-                            }),
+                            None => {
+                                cx.middleware.push(not_found.clone());
+                            }
                         };
 
-                        async move { Ok::<_, Error>(fut.await) }
+                        async move { Ok::<_, Error>(cx.next().await) }
                     }))
                 }
             }))

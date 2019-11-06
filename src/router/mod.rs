@@ -53,10 +53,23 @@ impl<Context: Send + 'static> Router<Context> {
     {
         let path = Self::join_paths(&self.path, path);
 
+        if path == self.path {
+            panic!(
+                "dont put parent path `{}` = scope path `{}`",
+                self.path, path
+            );
+        }
+
+        let middleware = if self.path == "/" {
+            vec![]
+        } else {
+            self.middleware.clone()
+        };
+
         let mut router = Router {
             path,
+            middleware,
             trees: self.trees.clone(),
-            middleware: self.middleware.clone(),
         };
 
         f(&mut router);
@@ -73,7 +86,11 @@ impl<Context: Send + 'static> Router<Context> {
         handler: BoxDynHandler<Context>,
     ) -> &mut Self {
         let path = &Self::join_paths(&self.path, path);
-        let mut middleware = self.middleware.clone();
+        let mut middleware = if self.path == "/" {
+            vec![]
+        } else {
+            self.middleware.clone()
+        };
         middleware.push(Arc::new(box_dyn_handler_into_middleware(handler)));
 
         info!("route: {} {}", method, path);
