@@ -1,6 +1,6 @@
 # Trek
 
-Fast, effective, minimalist web framework for Rust. Based on [Hyper], [Tokio] and [Async-std].
+Fast, effective, minimalist web framework for Rust. Based on [Futures], [Hyper], [Tokio] and [Async-std].
 
 [![CI Status](https://github.com/trek-rs/trek/workflows/ci/badge.svg)](https://github.com/trek-rs/trek/actions)
 
@@ -53,6 +53,7 @@ of the [trek] package on [Crates.io].
 
 [trek]: https://crates.io/crates/trek
 [crates.io]: https://crates.io/
+[futures]: https://rust-lang-nursery.github.io/futures-rs/
 [hyper]: https://hyper.rs/
 [tokio]: https://tokio.rs/
 [async-std]: https://async.rs/
