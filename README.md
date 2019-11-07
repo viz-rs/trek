@@ -44,7 +44,7 @@ at your option.
 
 ## Thanks
 
-Some ideas from [Tide], [Actix], [Rocket], [Wrap], [Phoenix], [Echo], [Gin]. Thanks for these excellent projects.
+Some ideas from [Tide], [Actix], [Rocket], [Warp], [Phoenix], [Echo], [Gin]. Thanks for these excellent projects.
 
 ## BTW
 
@@ -60,7 +60,7 @@ of the [trek] package on [Crates.io].
 [tide]: https://github.com/http-rs/tide
 [actix]: https://actix.rs/
 [rocket]: https://rocket.rs/
-[wrap]: https://github.com/seanmonstar/warp
+[warp]: https://github.com/seanmonstar/warp
 [phoenix]: https://phoenixframework.org/
 [echo]: https://echo.labstack.com/
 [gin]: https://gin-gonic.com/
