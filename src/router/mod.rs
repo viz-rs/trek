@@ -201,7 +201,7 @@ impl<Context: Send + 'static> Router<Context> {
         self
     }
 
-    #[allow(clippy::type_complexity)]
+    #[cfg_attr(feature = "cargo-clippy", allow(clippy::type_complexity))]
     pub fn find<'a>(
         &'a self,
         path: &'a str,

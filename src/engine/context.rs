@@ -76,31 +76,43 @@ impl<State: Send + Sync + 'static> Context<State> {
         self.request.headers()
     }
 
+    /// Access a mutable request's headers.
     pub fn headers_mut(&mut self) -> &mut HeaderMap {
         self.request.headers_mut()
     }
 
+    /// Access a request's header.
     pub fn header(&self, key: &'static str) -> Option<&HeaderValue> {
         self.headers().get(key)
     }
 
+    /// Access a mutable request's header.
     pub fn header_mut(&mut self, key: &'static str) -> Option<&mut HeaderValue> {
         self.headers_mut().get_mut(key)
     }
 
-    /// Access the extensions to the context.
+    /// Access the request's extensions.
     pub fn extensions(&self) -> &Extensions {
         self.request.extensions()
     }
 
-    /// Mutably access the extensions to the context.
+    /// Access a mutable request's extensions.
     pub fn extensions_mut(&mut self) -> &mut Extensions {
         self.request.extensions_mut()
     }
 
+    /// Access the request's path.
+    pub fn path(&self) -> &str {
+        self.uri().path()
+    }
+
+    /// Access the request's path.
+    pub fn query_string(&self) -> &str {
+        self.uri().query().unwrap_or("")
+    }
+
+    // Access a mutable request's body.
     pub fn take_body(&mut self) -> &mut Body {
-        // pub fn take_body(&mut self) -> Body {
-        // std::mem::replace(self.request.body_mut(), Body::empty())
         self.request.body_mut()
     }
 
@@ -120,6 +132,8 @@ impl<State: Send + Sync + 'static> Context<State> {
         // Ok(self.take_body().try_concat().await.unwrap().to_vec())
     }
 
+    /// From `application/json`
+    /// TODO: check `content-type` and 'content-length'
     pub async fn json<T: serde::de::DeserializeOwned>(&mut self) -> Result<T> {
         let body = self.bytes().await?;
         Ok(serde_json::from_slice(&body).map_err(|_| ErrorKind::InvalidData)?)
@@ -130,20 +144,15 @@ impl<State: Send + Sync + 'static> Context<State> {
         Ok(String::from_utf8(body).map_err(|_| ErrorKind::InvalidData)?)
     }
 
-    pub fn path(&self) -> &str {
-        self.uri().path()
-    }
-
-    pub fn query_string(&self) -> &str {
-        self.uri().query().unwrap_or("")
-    }
-
+    /// From `?query=string`.
+    /// TODO: check `content-type` and 'content-length'
     pub fn query<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
         let query = self.query_string();
         Ok(serde_qs::from_str(query).map_err(|_| ErrorKind::InvalidData)?)
     }
 
-    /// `application/x-www-form-urlencoded`
+    /// From `application/x-www-form-urlencoded`
+    /// TODO: check `content-type` and 'content-length'
     pub async fn form<T: serde::de::DeserializeOwned>(&mut self) -> Result<T> {
         let body = self.bytes().await?;
         Ok(serde_urlencoded::from_bytes(&body).map_err(|_| ErrorKind::InvalidData)?)
@@ -152,8 +161,8 @@ impl<State: Send + Sync + 'static> Context<State> {
     /// https://github.com/expressjs/multer
     /// https://crates.io/crates/multipart
     /// https://github.com/abonander/multipart-async
-    /// `multipart/form-data`
-    // pub async fn multipart(&mut self) -> Result<Multipart<Vec<u8>>> {
+    /// From `multipart/form-data`
+    /// TODO: check `content-type` and 'content-length'
     pub fn multipart(&mut self) -> Result<Multipart<&mut Body>> {
         const BOUNDARY: &str = "boundary=";
 

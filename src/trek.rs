@@ -3,17 +3,16 @@ use hyper::{
     service::{make_service_fn, service_fn},
     Error,
 };
-use std::sync::Arc;
+use std::{convert::Infallible, fmt, sync::Arc};
 
 use crate::{middleware::NotFound, Context, Router};
 
-#[derive(Debug)]
 pub struct Trek<State> {
     state: State,
     router: Router<Context<State>>,
 }
 
-impl<State: Default + Send + Sync + 'static> Trek<State> {
+impl<State: Send + Sync + 'static> Trek<State> {
     pub fn with_state(state: State) -> Self {
         Self {
             state,
@@ -37,9 +36,9 @@ impl<State: Default + Send + Sync + 'static> Trek<State> {
             std::io::Error::new(std::io::ErrorKind::Other, e)
         })?;
 
-        info!("trek running on https://{}", addr);
+        info!("Trek is running on http://{}", addr);
 
-        let state = Arc::new(State::default());
+        let state = Arc::new(self.state);
         let router = Arc::new(self.router);
         let not_found = Arc::new(NotFound::new());
 
@@ -50,7 +49,7 @@ impl<State: Default + Send + Sync + 'static> Trek<State> {
                 let not_found = not_found.clone();
 
                 async move {
-                    Ok::<_, Error>(service_fn(move |req| {
+                    Ok::<_, Infallible>(service_fn(move |req| {
                         let state = state.clone();
                         let path = req.uri().path().to_owned();
                         let method = req.method().to_owned();
@@ -91,5 +90,13 @@ impl Trek<()> {
 impl Default for Trek<()> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl<State> fmt::Debug for Trek<State> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_struct("Trek")
+            .field("router", &self.router)
+            .finish()
     }
 }
