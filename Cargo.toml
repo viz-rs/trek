@@ -19,6 +19,7 @@ publish = false
 members = [] 
 
 [dependencies]
+bytes = "0.4.12"
 log = "0.4.8"
 http = "0.1.19"
 futures = "0.3.1"
@@ -31,7 +32,7 @@ serde_urlencoded = "0.6.1"
 fnv = "1.0.3"
 Inflector = "0.11.4"
 path-tree = "0.1.9"
-tokio = "0.2.0-alpha.6"
+tokio = "=0.2.0-alpha.6"
 tokio-executor = "=0.2.0-alpha.6"
 tower-service = "0.3.0-alpha.2"
 multipart-async = { git = "https://github.com/abonander/multipart-async.git", rev = "623e5fc", features = ["server", "hyper"], default-features = false }

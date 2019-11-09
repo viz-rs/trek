@@ -1,3 +1,4 @@
+use bytes::BytesMut;
 use futures::future::BoxFuture;
 use http::Extensions;
 use hyper::{
@@ -111,6 +112,13 @@ impl<State: Send + Sync + 'static> Context<State> {
         self.uri().query().unwrap_or("")
     }
 
+    /// From `?query=string`.
+    /// TODO: check 'string-length'
+    pub fn query<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
+        let query = self.query_string();
+        Ok(serde_qs::from_str(query).map_err(|_| ErrorKind::InvalidData)?)
+    }
+
     // Access a mutable request's body.
     pub fn take_body(&mut self) -> &mut Body {
         self.request.body_mut()
@@ -122,14 +130,12 @@ impl<State: Send + Sync + 'static> Context<State> {
     /// https://github.com/rustasync/http-service/blob/master/src/lib.rs#L96
     /// https://github.com/seanmonstar/warp/blob/master/src/filters/body.rs
     pub async fn bytes(&mut self) -> Result<Vec<u8>> {
-        let mut bytes = Vec::new();
+        let mut bytes = BytesMut::with_capacity(8 * 1024);
         let body = self.take_body();
         while let Some(chunk) = body.next().await {
-            bytes.extend(chunk.map_err(|_| ErrorKind::InvalidData)?);
+            bytes.extend_from_slice(&chunk.map_err(|_| ErrorKind::InvalidData)?);
         }
-        Ok(bytes)
-        // use futures::stream::TryStreamExt;
-        // Ok(self.take_body().try_concat().await.unwrap().to_vec())
+        Ok(bytes.to_vec())
     }
 
     /// From `application/json`
@@ -142,13 +148,6 @@ impl<State: Send + Sync + 'static> Context<State> {
     pub async fn string(&mut self) -> Result<String> {
         let body = self.bytes().await?;
         Ok(String::from_utf8(body).map_err(|_| ErrorKind::InvalidData)?)
-    }
-
-    /// From `?query=string`.
-    /// TODO: check `content-type` and 'content-length'
-    pub fn query<T: serde::de::DeserializeOwned>(&self) -> Result<T> {
-        let query = self.query_string();
-        Ok(serde_qs::from_str(query).map_err(|_| ErrorKind::InvalidData)?)
     }
 
     /// From `application/x-www-form-urlencoded`
