@@ -21,6 +21,7 @@ pub mod middleware;
 pub use crate::{
     engine::{
         context::Context,
+        error::{Error, Result},
         handler::{box_dyn_handler_into_middleware, into_box_dyn_handler, BoxDynHandler, Handler},
         middleware::Middleware,
         parameters::Parameters,

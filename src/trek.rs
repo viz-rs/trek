@@ -24,10 +24,11 @@ impl<State: Send + Sync + 'static> Trek<State> {
         &mut self.router
     }
 
-    pub async fn run(self, addr: impl async_std::net::ToSocketAddrs) -> std::io::Result<()> {
+    pub async fn run(self, addr: impl std::net::ToSocketAddrs) -> std::io::Result<()> {
         let addr = addr
             .to_socket_addrs()
-            .await?
+            // .await?
+            .unwrap()
             .next()
             .ok_or(std::io::ErrorKind::InvalidInput)?;
 
