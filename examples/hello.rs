@@ -5,7 +5,7 @@ use bytes::{BufMut, BytesMut};
 use futures::future::Either;
 use std::pin::Pin;
 
-use futures::{future, ready, stream, FutureExt, Stream, StreamExt, TryFutureExt};
+use futures::{future, ready, stream, FutureExt, Stream, StreamExt};
 use headers::LastModified;
 use serde::{Deserialize, Serialize};
 use std::task::Poll;
@@ -164,8 +164,8 @@ impl IntoResponse for MyError {
     }
 }
 
-async fn send_file(cx: Context<()>) -> trek::Result<Response, MyError> {
-    // async fn send_file(cx: Context<()>) -> trek::Result {
+async fn send_file(cx: Context<()>) -> Result<Response, MyError> {
+    // async fn send_file(cx: Context<()>) -> Result {
     let mut path = std::env::current_dir()
         // .map_err(|_| std::io::Error::new(std::io::ErrorKind::InvalidData, ""))?;
         .map_err(|_| MyError { code: 400 })?;
