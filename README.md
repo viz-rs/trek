@@ -1,6 +1,6 @@
 # Trek
 
-Fast, effective, minimalist web framework for Rust. Based on [Futures], [Hyper], [Tokio] and [Async-std].
+Fast, effective, minimalist web framework for Rust. Based on [Futures], [Hyper], [Tokio] or [Async-std].
 
 [![CI Status](https://github.com/trek-rs/trek/workflows/ci/badge.svg)](https://github.com/trek-rs/trek/actions)
 
