@@ -23,7 +23,7 @@ impl Error {
     }
 }
 
-pub trait ErrorResponse: fmt::Debug + fmt::Display + Send + Sync {
+pub trait ErrorResponse: error::Error + Send + Sync {
     fn error_response(&self) -> Response {
         StatusCode::INTERNAL_SERVER_ERROR.into_response()
     }
@@ -52,8 +52,6 @@ impl fmt::Debug for Error {
         writeln!(f, "{:?}", &self.e)
     }
 }
-
-impl error::Error for Error {}
 
 /// `Error` for any error that implements `ErrorResponse`
 impl<T: ErrorResponse + 'static> From<T> for Error {

@@ -142,6 +142,8 @@ impl std::fmt::Display for MyError {
     }
 }
 
+impl std::error::Error for MyError {}
+
 impl ErrorResponse for MyError {
     fn error_response(&self) -> Response {
         let mut res = hyper::Response::new(hyper::Body::from("hello my error"));
@@ -162,9 +164,9 @@ async fn send_file(cx: Context<()>) -> Result {
 
     dbg!(&path.extension());
 
-    let file = tokio::fs::File::open(path)
-        .await
-        .map_err(|_| MyError { code: 404 })?;
+    let file = tokio::fs::File::open(path).await?;
+    // .await
+    // .map_err(|_| MyError { code: 404 })?;
 
     dbg!(&file);
 
