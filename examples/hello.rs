@@ -14,7 +14,7 @@ use tokio::io::AsyncRead;
 use futures::future::BoxFuture;
 use trek::middleware::Logger;
 use trek::{
-    into_box_dyn_handler, json, Context, IntoResponse, Middleware, Resources, Response, Result,
+    into_box_dyn_handler, json, Context, ErrorResponse, Middleware, Resources, Response, Result,
     Trek,
 };
 
@@ -142,90 +142,48 @@ impl std::fmt::Display for MyError {
     }
 }
 
-impl std::error::Error for MyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        dbg!(114);
-        Some(self)
-    }
-}
-impl From<MyError> for trek::Error {
-    fn from(e: MyError) -> Self {
-        dbg!(233);
-        trek::Error::new(Box::new(e))
-    }
-}
-
-impl IntoResponse for MyError {
-    fn into_response(self) -> Response {
-        dbg!(1024);
+impl ErrorResponse for MyError {
+    fn error_response(&self) -> Response {
         let mut res = hyper::Response::new(hyper::Body::from("hello my error"));
         *res.status_mut() = hyper::StatusCode::from_u16(self.code).unwrap();
         res
     }
 }
 
-async fn send_file(cx: Context<()>) -> Result<Response, MyError> {
-    // async fn send_file(cx: Context<()>) -> Result {
-    let mut path = std::env::current_dir()
-        // .map_err(|_| std::io::Error::new(std::io::ErrorKind::InvalidData, ""))?;
-        .map_err(|_| MyError { code: 400 })?;
+async fn send_file(cx: Context<()>) -> Result {
+    let mut path = std::env::current_dir()?;
     path.push("examples/static");
 
-    let suffix_path = cx.params::<String>().map_err(|_| MyError { code: 404 })?;
-    // .map_err(|_| std::io::Error::new(std::io::ErrorKind::NotFound, "File not found"))?;
+    let suffix_path = cx
+        .params::<String>()
+        .map_err(|_| std::io::Error::new(std::io::ErrorKind::NotFound, "File not found"))?;
 
     path.push(suffix_path);
 
     let file = tokio::fs::File::open(path)
         .await
-        .map_err(|_| MyError { code: 405 })?;
-    // .map_err(|_| std::io::Error::new(std::io::ErrorKind::NotFound, "File not found"))?;
+        .map_err(|_| MyError { code: 404 })?;
 
     dbg!(&file);
 
     let metadata = file
         .metadata()
-        // .await?
-        .await
-        .map_err(|_| MyError { code: 406 })?
+        .await?
         .modified()
         .ok()
         .map(LastModified::from);
 
     dbg!(&metadata);
 
-    // Ok("Hello".to_owned())
-
     Ok(hyper::Response::builder()
-        .body(hyper::Body::wrap_stream(file_stream(file, 1, (1, 100))))
+        .body(hyper::Body::wrap_stream(file_stream(file, 1, (0, 100))))
         .unwrap())
-
-    // if let Ok(mut path) = std::env::current_dir().map_err(|_| std::io::ErrorKind::InvalidData) {
-    //     path.push("examples/static");
-
-    //     if let Ok(star_path) = cx.params::<String>() {
-    //         path.push(star_path);
-    //         if let Ok(file) = tokio::fs::File::open(path).await {
-    //             if let Ok(metadata) = file.metadata().await {
-    //                 let modified = metadata.modified().ok().map(LastModified::from);
-    //                 dbg!(modified);
-    //                 return hyper::Response::builder()
-    //                     .body(hyper::Body::wrap_stream(file_stream(file, 1, (1, 100))))
-    //                     .unwrap();
-    //             }
-    //         }
-    //     }
-    // }
-
-    // hyper::Response::builder()
-    //     .status(404)
-    //     .body(hyper::Body::empty())
-    //     .unwrap()
 }
 
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
+    better_panic::install();
 
     let mut app = Trek::new();
 
