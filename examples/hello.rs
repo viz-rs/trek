@@ -160,20 +160,21 @@ async fn send_file(cx: Context<()>) -> Result {
 
     path.push(suffix_path);
 
+    dbg!(&path.extension());
+
     let file = tokio::fs::File::open(path)
         .await
         .map_err(|_| MyError { code: 404 })?;
 
     dbg!(&file);
 
-    let metadata = file
-        .metadata()
-        .await?
-        .modified()
-        .ok()
-        .map(LastModified::from);
+    let metadata = file.metadata().await?;
+    let modified = metadata.modified().ok().map(LastModified::from).unwrap();
 
     dbg!(&metadata);
+    dbg!(&metadata.len());
+    dbg!(&metadata.file_type());
+    dbg!(&modified);
 
     Ok(hyper::Response::builder()
         .body(hyper::Body::wrap_stream(file_stream(file, 1, (0, 100))))

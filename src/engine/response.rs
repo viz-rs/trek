@@ -57,20 +57,14 @@ impl IntoResponse for StatusCode {
 impl<T, U> IntoResponse for Result<T, U>
 where
     T: IntoResponse,
-    U: IntoResponse,
+    U: IntoResponse + std::fmt::Debug,
 {
     fn into_response(self) -> Response {
         match self {
             Ok(r) => r.into_response(),
             Err(r) => {
-                let res = r.into_response();
-                if res.status().is_success() {
-                    panic!(
-                        "Attempted to yield error response with success code {:?}",
-                        res.status()
-                    )
-                }
-                res
+                log::debug!("response error: {:?}", r);
+                r.into_response()
             }
         }
     }
