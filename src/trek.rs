@@ -24,10 +24,10 @@ impl<State: Send + Sync + 'static> Trek<State> {
         &mut self.router
     }
 
+    #[cfg(feature = "tokio")]
     pub async fn run(self, addr: impl std::net::ToSocketAddrs) -> std::io::Result<()> {
         let addr = addr
             .to_socket_addrs()
-            // .await?
             .unwrap()
             .next()
             .ok_or(std::io::ErrorKind::InvalidInput)?;
@@ -79,6 +79,12 @@ impl<State: Send + Sync + 'static> Trek<State> {
                 error!("server error: {}", e);
                 std::io::Error::new(std::io::ErrorKind::Other, e)
             })?)
+    }
+
+    #[cfg(feature = "async-std")]
+    // TODO
+    pub async fn run(self, addr: impl std::net::ToSocketAddrs) -> std::io::Result<()> {
+        Ok(())
     }
 }
 
