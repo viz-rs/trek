@@ -11,6 +11,8 @@ Fast, effective, minimalist web framework for Rust. Based on [Futures], [Hyper],
 
 ## Features
 
+- **Safety**
+
 ## Hello Trek
 
 ```rust

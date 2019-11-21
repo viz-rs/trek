@@ -53,8 +53,10 @@ impl fmt::Debug for Error {
     }
 }
 
+impl error::Error for Error {}
+
 /// `Error` for any error that implements `ErrorResponse`
-impl<T: ErrorResponse + 'static> From<T> for Error {
+impl<T: ErrorResponse + error::Error + 'static> From<T> for Error {
     fn from(e: T) -> Error {
         Error::new(Box::new(e))
     }

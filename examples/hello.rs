@@ -164,9 +164,9 @@ async fn send_file(cx: Context<()>) -> Result {
 
     dbg!(&path.extension());
 
-    let file = tokio::fs::File::open(path).await?;
-    // .await
-    // .map_err(|_| MyError { code: 404 })?;
+    let file = tokio::fs::File::open(path) //.await?;
+        .await
+        .map_err(|_| MyError { code: 404 })?;
 
     dbg!(&file);
 
