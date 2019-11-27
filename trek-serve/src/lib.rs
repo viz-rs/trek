@@ -20,9 +20,9 @@ pub struct ServeConfig {
 }
 
 impl ServeConfig {
-    pub fn new<P: AsRef<Path>>(path: P) -> Self {
+    pub fn new(path: impl Into<PathBuf>) -> Self {
         Self {
-            public: path.as_ref().to_path_buf(),
+            public: path.into(),
         }
     }
 }
@@ -98,10 +98,6 @@ impl ServeHandler {
         mut path: PathBuf,
         cx: Context<State>,
     ) -> Result {
-        // let mut path = std::env::current_dir()?;
-        // path.push("examples/static");
-        // let path = root.clone();
-
         let suffix_path = cx
             .params::<String>()
             .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "File not found"))?;
