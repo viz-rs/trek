@@ -76,6 +76,7 @@ impl ErrorResponse for io::Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
+        dbg!(&self.as_error_response());
         self.as_error_response().error_response()
     }
 }

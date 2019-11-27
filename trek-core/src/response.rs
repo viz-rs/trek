@@ -1,6 +1,7 @@
 use http::header::CONTENT_TYPE;
-use http::status::StatusCode;
-use hyper::Body;
+pub use http::status::StatusCode;
+pub use hyper::Body;
+pub use hyper::Chunk;
 
 /// An HTTP response with a streaming body.
 pub type Response = hyper::Response<Body>;

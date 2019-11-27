@@ -1,0 +1,36 @@
+[package]
+name = "examples"
+version = "0.0.0"
+publish = false
+edition = "2018"
+
+[dependencies]
+bytes = "0.4.12"
+log = "0.4.8"
+http = "0.1.19"
+futures = "0.3.1"
+headers = "0.2.3"
+hyper = { git = "https://github.com/hyperium/hyper", rev = "71d088d", features = ["unstable-stream"] }
+serde = { version = "1.0.101", features = ["derive"] }
+serde_json = "1.0.41"
+serde_qs = "0.5.0"
+serde_urlencoded = "0.6.1"
+fnv = "1.0.3"
+Inflector = "0.11.4"
+path-tree = "0.1.9"
+tower-service = "0.3.0-alpha.2"
+multipart-async = { git = "https://github.com/fundon/multipart-async", branch = "futures-0.3.1", default-features = false, features = ["hyper", "server"] }
+
+tokio = "0.2.0-alpha.6"
+
+pretty_env_logger = "0.3.1"
+better-panic = "0.2.0"
+anyhow = "1.0.22"
+
+trek = { path = "../trek", version = "0.0.0", default-features = false, features = ["tokio"] }
+trek-serve = { path = "../trek-serve", version = "0.0.0", optional = true }
+
+[[example]]
+name = "hello"
+path = "hello.rs"
+required-features = ["trek-serve"]

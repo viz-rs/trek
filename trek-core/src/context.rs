@@ -18,8 +18,8 @@ use crate::{Middleware, Parameters, Request, Response};
 pub struct Context<State> {
     state: Arc<State>,
     request: Request,
-    pub(crate) params: Vec<(String, String)>,
-    pub(crate) middleware: Vec<Arc<dyn Middleware<Self>>>,
+    pub params: Vec<(String, String)>,
+    pub middleware: Vec<Arc<dyn Middleware<Self>>>,
 }
 
 impl<State: Send + Sync + 'static> Context<State> {

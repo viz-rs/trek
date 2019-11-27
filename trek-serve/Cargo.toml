@@ -1,0 +1,18 @@
+[package]
+name = "trek-serve"
+version = "0.0.0"
+authors = ["Fangdun Cai <cfddream@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = "0.4.8"
+bytes = "0.4.12"
+headers = "0.2.3"
+futures = "0.3.1"
+tokio = "0.2.0-alpha.6"
+trek-core = { path = "../trek-core", version = "0.0.0" }
+
+[package.metadata.docs.rs]
+all-features = true

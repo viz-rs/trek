@@ -27,13 +27,22 @@ pub trait Cloneable<Context> {
     fn clone_handler(&self) -> BoxDynHandler<Context>;
 }
 
-impl<Context, F: Handler<Context, Fut = BoxFuture<'static, Response>>, Fut> Cloneable<Context> for F
+// impl<Context, F, Fut> Cloneable<Context> for F
+// where
+//     F: Clone + Send + Sync + 'static + Fn(Context) -> Fut,
+//     Fut: Future + Send + 'static,
+//     Fut::Output: IntoResponse + Send + 'static,
+// {
+//     #[inline(always)]
+//     fn clone_handler(&self) -> BoxDynHandler<Context> {
+//         Box::new(self.clone())
+//     }
+// }
+
+impl<Context, F> Cloneable<Context> for F
 where
-    F: Clone + Send + Sync + 'static + Fn(Context) -> Fut,
-    Fut: Future + Send + 'static,
-    Fut::Output: IntoResponse + Send + 'static,
+    F: Handler<Context, Fut = BoxFuture<'static, Response>> + Clone,
 {
-    #[inline(always)]
     fn clone_handler(&self) -> BoxDynHandler<Context> {
         Box::new(self.clone())
     }

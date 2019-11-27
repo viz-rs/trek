@@ -1,4 +1,4 @@
-use crate::Response;
+use crate::response::Response;
 use futures::future::BoxFuture;
 
 pub trait Middleware<Context>: Send + Sync + 'static {

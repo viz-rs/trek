@@ -11,24 +11,20 @@
 #[macro_use]
 extern crate log;
 
-mod engine;
 mod router;
 mod trek;
 
 pub mod middleware;
 
 #[doc(inline)]
+pub use trek_core::{
+    box_dyn_handler_into_middleware, helpers, html, into_box_dyn_handler, json, Body,
+    BoxDynHandler, Chunk, Context, Error, ErrorResponse, Handler, IntoResponse, Middleware,
+    Parameters, Request, Response, Result, StatusCode,
+};
+
+#[doc(inline)]
 pub use crate::{
-    engine::{
-        context::Context,
-        error::{Error, ErrorResponse, Result},
-        handler::{box_dyn_handler_into_middleware, into_box_dyn_handler, BoxDynHandler, Handler},
-        helpers,
-        middleware::Middleware,
-        parameters::Parameters,
-        request::Request,
-        response::{html, json, IntoResponse, Response},
-    },
     router::{Resource, Resources, Router},
     trek::Trek,
 };
