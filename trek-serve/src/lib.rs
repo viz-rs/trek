@@ -4,13 +4,9 @@ use futures::{
     ready, stream, FutureExt, Stream, StreamExt,
 };
 use headers::LastModified;
-use std::{
-    io,
-    path::{Path, PathBuf},
-    pin::Pin,
-    sync::Arc,
-    task::Poll,
-};
+use http::header::CONTENT_LENGTH;
+use hyper::Response as HyperResponse;
+use std::{io, path::PathBuf, pin::Pin, sync::Arc, task::Poll};
 use tokio::io::AsyncRead;
 use trek_core::{Body, Chunk, Context, Handler, IntoResponse, Response, Result};
 
@@ -118,11 +114,12 @@ impl ServeHandler {
         dbg!(&metadata.file_type());
         dbg!(&modified);
 
-        Ok(Response::new(Body::wrap_stream(file_stream(
-            file,
-            1,
-            (0, 100),
-        ))))
+        let res = HyperResponse::builder()
+            .header(CONTENT_LENGTH, metadata.len())
+            .body(Body::wrap_stream(file_stream(file, 1, (0, 100))))
+            .unwrap();
+
+        Ok(res)
     }
 }
 
@@ -133,13 +130,5 @@ impl<State: Send + Sync + 'static> Handler<Context<State>> for ServeHandler {
         let config = self.config.clone();
         let fut = Self::send_file(config.public.clone(), cx);
         Box::pin(async move { fut.await.into_response() })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }

@@ -6,10 +6,12 @@ edition = "2018"
 
 [dependencies]
 log = "0.4.8"
+http = "0.1.19"
 bytes = "0.4.12"
 headers = "0.2.3"
 futures = "0.3.1"
 tokio = "0.2.0-alpha.6"
+hyper = { git = "https://github.com/hyperium/hyper", rev = "71d088d", features = ["unstable-stream"] }
 trek-core = { path = "../trek-core", version = "0.0.0" }
 
 [package.metadata.docs.rs]
