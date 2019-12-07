@@ -1,4 +1,4 @@
-use bytes::{BufMut, BytesMut};
+use bytes::{BufMut, Bytes, BytesMut};
 use futures::{
     future::{self, BoxFuture, Either},
     ready, stream, FutureExt, Stream, StreamExt,
@@ -8,7 +8,7 @@ use http::header::CONTENT_LENGTH;
 use hyper::Response as HyperResponse;
 use std::{io, path::PathBuf, pin::Pin, sync::Arc, task::Poll};
 use tokio::io::AsyncRead;
-use trek_core::{Body, Chunk, Context, Handler, IntoResponse, Response, Result};
+use trek_core::{Body, Context, Handler, IntoResponse, Response, Result};
 
 #[derive(Debug)]
 pub struct ServeConfig {
@@ -32,7 +32,7 @@ fn file_stream(
     mut file: tokio::fs::File,
     buf_size: usize,
     (start, end): (u64, u64),
-) -> impl Stream<Item = std::result::Result<Chunk, io::Error>> + Send {
+) -> impl Stream<Item = std::result::Result<Bytes, io::Error>> + Send {
     let seek = async move {
         if start != 0 {
             file.seek(io::SeekFrom::Start(start)).await?;
@@ -69,7 +69,7 @@ fn file_stream(
                     return Poll::Ready(None);
                 }
 
-                let mut chunk = buf.take().freeze();
+                let mut chunk = buf.split_to(buf.len()).freeze();
                 if n > len {
                     chunk = chunk.split_to(len as usize);
                     len = 0;
@@ -77,7 +77,7 @@ fn file_stream(
                     len -= n;
                 }
 
-                Poll::Ready(Some(Ok(Chunk::from(chunk))))
+                Poll::Ready(Some(Ok(chunk)))
             }))
         })
         .flatten()

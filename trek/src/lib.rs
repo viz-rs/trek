@@ -19,8 +19,8 @@ pub mod middleware;
 #[doc(inline)]
 pub use trek_core::{
     box_dyn_handler_into_middleware, helpers, html, into_box_dyn_handler, json, Body,
-    BoxDynHandler, Chunk, Context, Error, ErrorResponse, Handler, IntoResponse, Middleware,
-    Parameters, Request, Response, Result, StatusCode,
+    BoxDynHandler, Context, Error, ErrorResponse, Handler, IntoResponse, Middleware, Parameters,
+    Request, Response, Result, StatusCode,
 };
 
 #[doc(inline)]

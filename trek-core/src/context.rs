@@ -1,11 +1,11 @@
 use bytes::BytesMut;
 use futures::future::BoxFuture;
+use futures::stream::StreamExt;
 use http::Extensions;
 use hyper::{
     header::{HeaderMap, HeaderValue, CONTENT_TYPE},
     Body, Method, Uri, Version,
 };
-use multipart_async::server::Multipart;
 use std::{
     fmt,
     io::{Error, ErrorKind, Result},
@@ -162,6 +162,7 @@ impl<State: Send + Sync + 'static> Context<State> {
     /// https://github.com/abonander/multipart-async
     /// From `multipart/form-data`
     /// TODO: check `content-type` and 'content-length'
+    #[cfg(feature = "multipart")]
     pub fn multipart(&mut self) -> Result<Multipart<&mut Body>> {
         const BOUNDARY: &str = "boundary=";
 
@@ -175,7 +176,10 @@ impl<State: Send + Sync + 'static> Context<State> {
             })
             .ok_or_else(|| Error::new(ErrorKind::Other, "no boundary found"))?;
 
-        Ok(Multipart::with_body(self.take_body(), boundary))
+        Ok(multipart_async::server::Multipart::with_body(
+            self.take_body(),
+            boundary,
+        ))
     }
 
     pub fn params<T: serde::de::DeserializeOwned>(&self) -> Result<T> {

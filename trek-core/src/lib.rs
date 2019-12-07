@@ -13,4 +13,4 @@ pub use handler::{box_dyn_handler_into_middleware, into_box_dyn_handler, BoxDynH
 pub use middleware::Middleware;
 pub use parameters::Parameters;
 pub use request::Request;
-pub use response::{html, json, Body, Chunk, IntoResponse, Response, StatusCode};
+pub use response::{html, json, Body, IntoResponse, Response, StatusCode};

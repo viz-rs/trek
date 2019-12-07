@@ -5,21 +5,24 @@ authors = ["Fangdun Cai <cfddream@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-bytes = "0.4.12"
-log = "0.4.8"
-http = "0.1.19"
-futures = "0.3.1"
-headers = "0.2.3"
-hyper = { git = "https://github.com/hyperium/hyper", rev = "71d088d", features = ["unstable-stream"] }
-serde = { version = "1.0.101", features = ["derive"] }
-serde_json = "1.0.41"
-serde_qs = "0.5.0"
-serde_urlencoded = "0.6.1"
-fnv = "1.0.3"
-Inflector = "0.11.4"
-path-tree = "0.1.9"
-tower-service = "0.3.0-alpha.2"
-multipart-async = { git = "https://github.com/fundon/multipart-async", branch = "futures-0.3.1", default-features = false, features = ["hyper", "server"] }
+bytes = "0.5"
+log = "0.4"
+http = "0.2"
+futures = "0.3"
+headers = "0.2"
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_qs = "0.5"
+serde_urlencoded = "0.6"
+
+fnv = "1.0"
+Inflector = "0.11"
+path-tree = "0.1"
+tower-service = "0.3"
+
+hyper = { git = "https://github.com/hyperium/hyper", rev = "78e8da1" }
+multipart-async = { git = "https://github.com/fundon/multipart-async", branch = "tokio-0.2", default-features = false, features = ["hyper", "server"], optional = true }
 
 [package.metadata.docs.rs]
 all-features = true
