@@ -3,14 +3,19 @@ use futures::future::BoxFuture;
 use futures::stream::StreamExt;
 use http::Extensions;
 use hyper::{
-    header::{HeaderMap, HeaderValue, CONTENT_TYPE},
+    header::{HeaderMap, HeaderValue},
     Body, Method, Uri, Version,
 };
 use std::{
     fmt,
-    io::{Error, ErrorKind, Result},
+    io::{ErrorKind, Result},
     sync::Arc,
 };
+
+#[cfg(feature = "multipart")]
+use hyper::header::CONTENT_TYPE;
+#[cfg(feature = "multipart")]
+use std::io::Error;
 
 use crate::{Middleware, Parameters, Request, Response};
 

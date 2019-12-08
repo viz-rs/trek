@@ -101,7 +101,7 @@ pub fn json<T>(t: &T) -> Response
 where
     T: serde::Serialize,
 {
-    let mut res = http::Response::builder();
+    let res = http::Response::builder();
 
     match serde_json::to_vec(t) {
         Ok(v) => res
