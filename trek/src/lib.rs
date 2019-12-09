@@ -11,7 +11,6 @@
 #[macro_use]
 extern crate log;
 
-mod router;
 mod trek;
 
 pub mod middleware;
