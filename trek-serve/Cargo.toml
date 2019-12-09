@@ -11,10 +11,10 @@ http = "0.2"
 futures = "0.3"
 headers = "0.2"
 
+trek-core = { path = "../trek-core", version = "0.0.0" }
+
 tokio = { version = "0.2", default-features = false, features = ["fs", "io-std", "io-util"] }
 hyper = { git = "https://github.com/hyperium/hyper", rev = "78e8da1" }
-
-trek-core = { path = "../trek-core", version = "0.0.0" }
 
 [package.metadata.docs.rs]
 all-features = true

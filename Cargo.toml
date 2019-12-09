@@ -2,6 +2,7 @@
 members = [
   "trek",
   "trek-core",
+  "trek-router",
   "trek-serve",
 
     # Internal

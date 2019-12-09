@@ -24,7 +24,7 @@ pub use trek_core::{
 };
 
 #[doc(inline)]
-pub use crate::{
-    router::{Resource, Resources, Router},
-    trek::Trek,
-};
+pub use trek_router::{Resource, Resources, Router};
+
+#[doc(inline)]
+pub use crate::trek::Trek;

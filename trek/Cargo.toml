@@ -20,24 +20,18 @@ default = ["tokio"]
 unstable = []
 
 [dependencies]
-bytes = "0.5"
 log = "0.4"
 http = "0.2"
 futures = "0.3"
-headers = "0.2"
-
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-serde_qs = "0.5"
-serde_urlencoded = "0.6"
 
 fnv = "1.0"
 Inflector = "0.11"
 path-tree = "0.1"
-tower-service = "0.3"
+
+trek-core = { path = "../trek-core", version = "0.0.0" }
+trek-router = { path = "../trek-router", version = "0.0.0" }
 
 hyper = { git = "https://github.com/hyperium/hyper", rev = "78e8da1" }
-trek-core = { path = "../trek-core", version = "0.0.0" }
 
 tokio = { version = "0.2", optional = true }
 async-std = { version = "1.0", optional = true }

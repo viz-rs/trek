@@ -25,11 +25,11 @@ pretty_env_logger = "0.3.1"
 better-panic = "0.2.0"
 anyhow = "1.0.22"
 
-hyper = { git = "https://github.com/hyperium/hyper", rev = "78e8da1" }
-multipart-async = { git = "https://github.com/fundon/multipart-async", branch = "tokio-0.2", default-features = false, features = ["hyper", "server"] }
-
 trek = { path = "../trek", version = "0.0.0", default-features = false, features = ["tokio"] }
 trek-serve = { path = "../trek-serve", version = "0.0.0", optional = true }
+
+hyper = { git = "https://github.com/hyperium/hyper", rev = "78e8da1" }
+multipart-async = { git = "https://github.com/fundon/multipart-async", branch = "tokio-0.2", default-features = false, features = ["hyper", "server"] }
 
 [dev-dependencies]
 tokio = { version = "0.2.2", features = ["fs", "macros", "io-std", "rt-util", "sync", "time", "test-util"] }
