@@ -3,12 +3,27 @@ use futures::{
     future::{self, BoxFuture, Either},
     ready, stream, FutureExt, Stream, StreamExt,
 };
-use headers::LastModified;
+// use headers::LastModified;
 use http::header::CONTENT_LENGTH;
 use hyper::Response as HyperResponse;
-use std::{io, path::PathBuf, pin::Pin, sync::Arc, task::Poll};
+use std::ffi::OsStr;
+use std::{
+    io,
+    path::{Path, PathBuf},
+    pin::Pin,
+    sync::Arc,
+    task::Poll,
+};
 use tokio::io::AsyncRead;
 use trek_core::{Body, Context, Handler, IntoResponse, Response, Result};
+
+const FILE: &'static str = "file";
+const FOLDER: &'static str = "folder";
+const DIRECTORY: &'static str = "directory";
+const DIRECTORY_TEMPLATE: &'static str = include_str!("directory.html");
+const BREADCRUMB_TEMPLATE: &'static str = r#"<a href="{{href}}">{{name}}/</a>"#;
+const FILE_TEMPLATE: &'static str =
+    r#"<li><a href="{{href}}" title="{{title}}" class="{{type}} {{ext}}">{{base}}</a></li>"#;
 
 #[derive(Debug)]
 pub struct ServeConfig {
@@ -18,7 +33,7 @@ pub struct ServeConfig {
 impl ServeConfig {
     pub fn new(path: impl Into<PathBuf>) -> Self {
         Self {
-            public: path.into(),
+            public: path.into().canonicalize().unwrap(),
         }
     }
 }
@@ -94,32 +109,98 @@ impl ServeHandler {
         mut path: PathBuf,
         cx: Context<State>,
     ) -> Result {
-        let suffix_path = cx
-            .params::<String>()
-            .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "File not found"))?;
+        let mut suffix_path = "".to_owned();
 
-        path.push(suffix_path);
+        if !cx.params.is_empty() {
+            suffix_path = cx
+                .params::<String>()
+                .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "File not found"))?;
+        }
 
-        dbg!(&path.extension());
+        path.push(suffix_path.clone());
 
-        let file = tokio::fs::File::open(path).await?;
-
-        dbg!(&file);
+        let file = tokio::fs::File::open(path.clone()).await?;
 
         let metadata = file.metadata().await?;
-        let modified = metadata.modified().ok().map(LastModified::from).unwrap();
+        // let modified = LastModified::from(metadata.modified()?);
+        let file_type = metadata.file_type();
 
-        dbg!(&metadata);
-        dbg!(&metadata.len());
-        dbg!(&metadata.file_type());
-        dbg!(&modified);
+        let res = if file_type.is_file() {
+            // let ext = path.extension();
 
-        let res = HyperResponse::builder()
-            .header(CONTENT_LENGTH, metadata.len())
-            .body(Body::wrap_stream(file_stream(file, 1, (0, 100))))
-            .unwrap();
+            HyperResponse::builder()
+                .header(CONTENT_LENGTH, metadata.len())
+                .body(Body::wrap_stream(file_stream(file, 1, (0, 100))))
+        } else if file_type.is_dir() {
+            let curr_path = Path::new(cx.path());
+            let mut entries = tokio::fs::read_dir(path.clone()).await?;
+            let mut files = Vec::new();
 
-        Ok(res)
+            if !suffix_path.is_empty() {
+                let parent = curr_path.parent().unwrap();
+                files.push(
+                    FILE_TEMPLATE
+                        .replace("{{href}}", parent.join("").to_str().unwrap())
+                        .replace("{{title}}", parent.file_name().unwrap().to_str().unwrap())
+                        .replace("{{type}}", DIRECTORY)
+                        .replace("{{ext}}", "")
+                        .replace("{{base}}", ".."),
+                )
+            }
+
+            while let Some(entry) = entries.next_entry().await? {
+                let file_name = entry.file_name();
+                let file_name = file_name.to_str().unwrap();
+                let file_type = if entry.file_type().await?.is_file() {
+                    FILE
+                } else {
+                    FOLDER
+                };
+                let file_path = entry.path();
+                let file_path = file_path.strip_prefix(path.clone()).unwrap();
+                let file_ext = file_path
+                    .extension()
+                    .unwrap_or_else(|| OsStr::new(""))
+                    .to_str()
+                    .unwrap();
+
+                files.push(
+                    FILE_TEMPLATE
+                        .replace("{{href}}", curr_path.join(file_path).to_str().unwrap())
+                        .replace("{{title}}", file_name)
+                        .replace("{{type}}", file_type)
+                        .replace("{{ext}}", file_ext)
+                        .replace("{{base}}", file_name),
+                );
+            }
+
+            let mut breadcrumb: Vec<String> = curr_path
+                .ancestors()
+                .filter(|a| a.file_name().is_some())
+                .map(|a| {
+                    BREADCRUMB_TEMPLATE
+                        .replace("{{href}}", a.join("").to_str().unwrap())
+                        .replace("{{name}}", a.file_name().unwrap().to_str().unwrap())
+                })
+                .collect();
+
+            breadcrumb.reverse();
+
+            let body = DIRECTORY_TEMPLATE
+                .replace("{{title}}", curr_path.to_str().unwrap())
+                .replace("{{breadcrumb}}", &breadcrumb.join(" "))
+                .replace("{{files}}", &files.join(""));
+
+            HyperResponse::builder()
+                .header(CONTENT_LENGTH, body.len())
+                .body(Body::from(body))
+        } else {
+            HyperResponse::builder()
+                .status(hyper::StatusCode::NOT_FOUND)
+                .body(Body::empty())
+        };
+
+        Ok(res.map_err(|_| io::Error::new(io::ErrorKind::Other, "Can not response"))?)
     }
 }
 

@@ -109,6 +109,7 @@ async fn main() {
         })
         .any("/anywhere", |_| async { "Anywhere" })
         .get("/static/*", ServeHandler::new(ServeConfig::new("static/")));
+    // .get("/static/*", ServeHandler::new(ServeConfig::new("..")));
 
     if let Err(e) = app.run("127.0.0.1:8000").await {
         error!("Error: {}", e);
