@@ -10,6 +10,7 @@ log = "0.4"
 http = "0.2"
 futures = "0.3"
 headers = "0.2"
+hyper = "0.13"
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -21,7 +22,6 @@ Inflector = "0.11"
 path-tree = "0.1"
 tower-service = "0.3"
 
-hyper = { git = "https://github.com/hyperium/hyper", rev = "78e8da1" }
 multipart-async = { git = "https://github.com/fundon/multipart-async", branch = "tokio-0.2", default-features = false, features = ["hyper", "server"], optional = true }
 
 [package.metadata.docs.rs]

@@ -6,8 +6,8 @@ const VAR_HREF: &str = "{{href}}";
 const VAR_TITLE: &str = "{{title}}";
 const VAR_KIND: &str = "{{kind}}";
 
-const TPL_BREADCRUMB: &str = r#"<a href="{{href}}">{{base}}/</a>"#;
 const TPL_DIRECTORY: &str = include_str!("directory.html");
+const TPL_BREADCRUMB: &str = r#"<a href="{{href}}">{{base}}/</a>"#;
 const TPL_FILE: &str =
     r#"<li><a href="{{href}}" title="{{title}}" class="{{kind}} {{ext}}">{{base}}</a></li>"#;
 

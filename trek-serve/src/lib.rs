@@ -121,9 +121,14 @@ impl ServeHandler {
         let file_type = metadata.file_type();
 
         let res = if file_type.is_file() {
-            // let ext = path.extension();
+            let content_type = match path.extension() {
+                Some(ext) => mime_db::lookup(ext.to_owned().into_string().unwrap()),
+                None => None,
+            }
+            .unwrap_or_else(|| "application/octet-stream");
 
             HyperResponse::builder()
+                .header(CONTENT_TYPE, content_type)
                 .header(CONTENT_LENGTH, metadata.len())
                 .body(Body::wrap_stream(file_stream(file, 1, (0, 100))))
         } else if file_type.is_dir() {
