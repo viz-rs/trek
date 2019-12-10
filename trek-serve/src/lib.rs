@@ -17,12 +17,21 @@ use std::{
 use tokio::io::AsyncRead;
 use trek_core::{Body, Context, Handler, IntoResponse, Response, Result};
 
-const FILE: &'static str = "file";
-const FOLDER: &'static str = "folder";
-const DIRECTORY: &'static str = "directory";
-const DIRECTORY_TEMPLATE: &'static str = include_str!("directory.html");
-const BREADCRUMB_TEMPLATE: &'static str = r#"<a href="{{href}}">{{name}}/</a>"#;
-const FILE_TEMPLATE: &'static str =
+const FILE: &str = "file";
+const FOLDER: &str = "folder";
+const DIRECTORY: &str = "directory";
+
+const VAR_BASE: &str = "{{base}}";
+const VAR_BREADCRUMB: &str = "{{breadcrumb}}";
+const VAR_EXT: &str = "{{ext}}";
+const VAR_FILES: &str = "{{files}}";
+const VAR_HREF: &str = "{{href}}";
+const VAR_TITLE: &str = "{{title}}";
+const VAR_TYPE: &str = "{{type}}";
+
+const TPL_BREADCRUMB: &str = r#"<a href="{{href}}">{{base}}/</a>"#;
+const TPL_DIRECTORY: &str = include_str!("directory.html");
+const TPL_FILE: &str =
     r#"<li><a href="{{href}}" title="{{title}}" class="{{type}} {{ext}}">{{base}}</a></li>"#;
 
 #[derive(Debug)]
@@ -109,13 +118,12 @@ impl ServeHandler {
         mut path: PathBuf,
         cx: Context<State>,
     ) -> Result {
-        let mut suffix_path = "".to_owned();
-
-        if !cx.params.is_empty() {
-            suffix_path = cx
-                .params::<String>()
-                .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "File not found"))?;
-        }
+        let suffix_path = if cx.params.is_empty() {
+            "".to_owned()
+        } else {
+            cx.params::<String>()
+                .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "File not found"))?
+        };
 
         path.push(suffix_path.clone());
 
@@ -139,12 +147,12 @@ impl ServeHandler {
             if !suffix_path.is_empty() {
                 let parent = curr_path.parent().unwrap();
                 files.push(
-                    FILE_TEMPLATE
-                        .replace("{{href}}", parent.join("").to_str().unwrap())
-                        .replace("{{title}}", parent.file_name().unwrap().to_str().unwrap())
-                        .replace("{{type}}", DIRECTORY)
-                        .replace("{{ext}}", "")
-                        .replace("{{base}}", ".."),
+                    TPL_FILE
+                        .replace(VAR_HREF, parent.join("").to_str().unwrap())
+                        .replace(VAR_TITLE, parent.file_name().unwrap().to_str().unwrap())
+                        .replace(VAR_TYPE, DIRECTORY)
+                        .replace(VAR_EXT, "")
+                        .replace(VAR_BASE, ".."),
                 )
             }
 
@@ -165,12 +173,12 @@ impl ServeHandler {
                     .unwrap();
 
                 files.push(
-                    FILE_TEMPLATE
-                        .replace("{{href}}", curr_path.join(file_path).to_str().unwrap())
-                        .replace("{{title}}", file_name)
-                        .replace("{{type}}", file_type)
-                        .replace("{{ext}}", file_ext)
-                        .replace("{{base}}", file_name),
+                    TPL_FILE
+                        .replace(VAR_HREF, curr_path.join(file_path).to_str().unwrap())
+                        .replace(VAR_TITLE, file_name)
+                        .replace(VAR_TYPE, file_type)
+                        .replace(VAR_EXT, file_ext)
+                        .replace(VAR_BASE, file_name),
                 );
             }
 
@@ -178,18 +186,18 @@ impl ServeHandler {
                 .ancestors()
                 .filter(|a| a.file_name().is_some())
                 .map(|a| {
-                    BREADCRUMB_TEMPLATE
-                        .replace("{{href}}", a.join("").to_str().unwrap())
-                        .replace("{{name}}", a.file_name().unwrap().to_str().unwrap())
+                    TPL_BREADCRUMB
+                        .replace(VAR_HREF, a.join("").to_str().unwrap())
+                        .replace(VAR_BASE, a.file_name().unwrap().to_str().unwrap())
                 })
                 .collect();
 
             breadcrumb.reverse();
 
-            let body = DIRECTORY_TEMPLATE
-                .replace("{{title}}", curr_path.to_str().unwrap())
-                .replace("{{breadcrumb}}", &breadcrumb.join(" "))
-                .replace("{{files}}", &files.join(""));
+            let body = TPL_DIRECTORY
+                .replace(VAR_TITLE, curr_path.to_str().unwrap())
+                .replace(VAR_BREADCRUMB, &breadcrumb.join(" "))
+                .replace(VAR_FILES, &files.join(""));
 
             HyperResponse::builder()
                 .header(CONTENT_LENGTH, body.len())
