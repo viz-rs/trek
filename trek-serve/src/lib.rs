@@ -4,7 +4,7 @@ use futures::{
     ready, stream, FutureExt, Stream, StreamExt,
 };
 // use headers::LastModified;
-use http::header::CONTENT_LENGTH;
+use http::header::{CONTENT_LENGTH, CONTENT_TYPE};
 use hyper::Response as HyperResponse;
 use std::ffi::OsStr;
 use std::{
@@ -17,22 +17,9 @@ use std::{
 use tokio::io::AsyncRead;
 use trek_core::{Body, Context, Handler, IntoResponse, Response, Result};
 
-const FILE: &str = "file";
-const FOLDER: &str = "folder";
-const DIRECTORY: &str = "directory";
+mod template;
 
-const VAR_BASE: &str = "{{base}}";
-const VAR_BREADCRUMB: &str = "{{breadcrumb}}";
-const VAR_EXT: &str = "{{ext}}";
-const VAR_FILES: &str = "{{files}}";
-const VAR_HREF: &str = "{{href}}";
-const VAR_TITLE: &str = "{{title}}";
-const VAR_TYPE: &str = "{{type}}";
-
-const TPL_BREADCRUMB: &str = r#"<a href="{{href}}">{{base}}/</a>"#;
-const TPL_DIRECTORY: &str = include_str!("directory.html");
-const TPL_FILE: &str =
-    r#"<li><a href="{{href}}" title="{{title}}" class="{{type}} {{ext}}">{{base}}</a></li>"#;
+use template::{render_breadcrumb, render_directory, render_file, DIRECTORY, FILE, FOLDER};
 
 #[derive(Debug)]
 pub struct ServeConfig {
@@ -144,41 +131,55 @@ impl ServeHandler {
             let mut entries = tokio::fs::read_dir(path.clone()).await?;
             let mut files = Vec::new();
 
-            if !suffix_path.is_empty() {
-                let parent = curr_path.parent().unwrap();
-                files.push(
-                    TPL_FILE
-                        .replace(VAR_HREF, parent.join("").to_str().unwrap())
-                        .replace(VAR_TITLE, parent.file_name().unwrap().to_str().unwrap())
-                        .replace(VAR_TYPE, DIRECTORY)
-                        .replace(VAR_EXT, "")
-                        .replace(VAR_BASE, ".."),
-                )
-            }
-
             while let Some(entry) = entries.next_entry().await? {
-                let file_name = entry.file_name();
-                let file_name = file_name.to_str().unwrap();
+                // let file_name = entry.file_name();
+                let file_name = entry.file_name().into_string().unwrap();
                 let file_type = if entry.file_type().await?.is_file() {
                     FILE
                 } else {
                     FOLDER
                 };
+
                 let file_path = entry.path();
                 let file_path = file_path.strip_prefix(path.clone()).unwrap();
                 let file_ext = file_path
                     .extension()
                     .unwrap_or_else(|| OsStr::new(""))
-                    .to_str()
+                    .to_owned()
+                    .into_string()
                     .unwrap();
 
-                files.push(
-                    TPL_FILE
-                        .replace(VAR_HREF, curr_path.join(file_path).to_str().unwrap())
-                        .replace(VAR_TITLE, file_name)
-                        .replace(VAR_TYPE, file_type)
-                        .replace(VAR_EXT, file_ext)
-                        .replace(VAR_BASE, file_name),
+                files.push((
+                    curr_path
+                        .join(file_path)
+                        .into_os_string()
+                        .into_string()
+                        .unwrap(),
+                    file_name.to_owned(),
+                    file_type.to_owned(),
+                    file_ext,
+                    file_name,
+                ));
+            }
+
+            files.sort_by_key(|f| f.1.to_owned());
+
+            if !suffix_path.is_empty() {
+                let parent = curr_path.parent().unwrap();
+                files.insert(
+                    0,
+                    (
+                        parent.join("").into_os_string().into_string().unwrap(),
+                        parent
+                            .file_name()
+                            .unwrap()
+                            .to_owned()
+                            .into_string()
+                            .unwrap(),
+                        DIRECTORY.to_owned(),
+                        "".to_owned(),
+                        "..".to_owned(),
+                    ),
                 );
             }
 
@@ -186,20 +187,35 @@ impl ServeHandler {
                 .ancestors()
                 .filter(|a| a.file_name().is_some())
                 .map(|a| {
-                    TPL_BREADCRUMB
-                        .replace(VAR_HREF, a.join("").to_str().unwrap())
-                        .replace(VAR_BASE, a.file_name().unwrap().to_str().unwrap())
+                    render_breadcrumb(
+                        a.join("").to_str().unwrap(),
+                        a.file_name().unwrap().to_str().unwrap(),
+                    )
                 })
                 .collect();
 
             breadcrumb.reverse();
 
-            let body = TPL_DIRECTORY
-                .replace(VAR_TITLE, curr_path.to_str().unwrap())
-                .replace(VAR_BREADCRUMB, &breadcrumb.join(" "))
-                .replace(VAR_FILES, &files.join(""));
+            let body = render_directory(
+                curr_path.to_str().unwrap(),
+                &breadcrumb.join(" "),
+                &files
+                    .iter()
+                    .map(|f| {
+                        render_file(
+                            f.0.to_owned(),
+                            f.1.to_owned(),
+                            f.2.to_owned(),
+                            f.3.to_owned(),
+                            f.4.to_owned(),
+                        )
+                    })
+                    .collect::<Vec<String>>()
+                    .join(""),
+            );
 
             HyperResponse::builder()
+                .header(CONTENT_TYPE, "text/html; charset=utf-8")
                 .header(CONTENT_LENGTH, body.len())
                 .body(Body::from(body))
         } else {
