@@ -1,6 +1,5 @@
-use bytes::BytesMut;
+use bytes::Bytes;
 use futures::future::BoxFuture;
-use futures::stream::StreamExt;
 use http::Extensions;
 use hyper::{
     header::{HeaderMap, HeaderValue},
@@ -125,8 +124,8 @@ impl<State: Send + Sync + 'static> Context<State> {
     }
 
     // Access a mutable request's body.
-    pub fn take_body(&mut self) -> &mut Body {
-        self.request.body_mut()
+    pub fn take_body(self) -> Body {
+        self.request.into_body()
     }
 
     /// Todo: limit size
@@ -134,30 +133,28 @@ impl<State: Send + Sync + 'static> Context<State> {
     /// https://github.com/stream-utils/raw-body
     /// https://github.com/rustasync/http-service/blob/master/src/lib.rs#L96
     /// https://github.com/seanmonstar/warp/blob/master/src/filters/body.rs
-    pub async fn bytes(&mut self) -> Result<Vec<u8>> {
-        let mut bytes = BytesMut::with_capacity(8 * 1024);
-        let body = self.take_body();
-        while let Some(chunk) = body.next().await {
-            bytes.extend_from_slice(&chunk.map_err(|_| ErrorKind::InvalidData)?);
-        }
-        Ok(bytes.to_vec())
+    pub async fn bytes(self) -> Result<Bytes> {
+        let body = hyper::body::to_bytes(self.take_body())
+            .await
+            .map_err(|_| ErrorKind::InvalidData)?;
+        Ok(body)
     }
 
     /// From `application/json`
     /// TODO: check `content-type` and 'content-length'
-    pub async fn json<T: serde::de::DeserializeOwned>(&mut self) -> Result<T> {
+    pub async fn json<T: serde::de::DeserializeOwned>(self) -> Result<T> {
         let body = self.bytes().await?;
         Ok(serde_json::from_slice(&body).map_err(|_| ErrorKind::InvalidData)?)
     }
 
-    pub async fn string(&mut self) -> Result<String> {
+    pub async fn string(self) -> Result<String> {
         let body = self.bytes().await?;
-        Ok(String::from_utf8(body).map_err(|_| ErrorKind::InvalidData)?)
+        Ok(String::from_utf8(body.to_vec()).map_err(|_| ErrorKind::InvalidData)?)
     }
 
     /// From `application/x-www-form-urlencoded`
     /// TODO: check `content-type` and 'content-length'
-    pub async fn form<T: serde::de::DeserializeOwned>(&mut self) -> Result<T> {
+    pub async fn form<T: serde::de::DeserializeOwned>(self) -> Result<T> {
         let body = self.bytes().await?;
         Ok(serde_urlencoded::from_bytes(&body).map_err(|_| ErrorKind::InvalidData)?)
     }

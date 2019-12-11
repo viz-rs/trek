@@ -82,8 +82,7 @@ impl<State: Send + Sync + 'static> Trek<State> {
     }
 
     #[cfg(feature = "async-std")]
-    // TODO
-    pub async fn run(self, addr: impl std::net::ToSocketAddrs) -> std::io::Result<()> {
+    pub async fn run(self, addr: impl async_std::net::ToSocketAddrs) -> std::io::Result<()> {
         Ok(())
     }
 }

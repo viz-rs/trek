@@ -65,7 +65,7 @@ struct UserInfo {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), std::io::Error> {
     pretty_env_logger::init();
     better_panic::install();
 
@@ -114,4 +114,6 @@ async fn main() {
     if let Err(e) = app.run("127.0.0.1:8000").await {
         error!("Error: {}", e);
     }
+
+    Ok(())
 }
