@@ -21,9 +21,10 @@ unstable = []
 
 [dependencies]
 log = "0.4"
-http = "0.2"
 futures = "0.3"
-hyper = { version = "0.13", default-features = false }
+
+http = "0.2"
+hyper = "0.13" 
 
 fnv = "1.0"
 Inflector = "0.11"

@@ -1,8 +1,8 @@
 use bytes::Bytes;
 use futures::future::BoxFuture;
-use http::Extensions;
 use hyper::{
     header::{HeaderMap, HeaderValue},
+    http::Extensions,
     Body, Method, Uri, Version,
 };
 use std::{

@@ -108,7 +108,14 @@ async fn main() -> Result<(), std::io::Error> {
             });
         })
         .any("/anywhere", |_| async { "Anywhere" })
-        .get("/static/*", ServeHandler::new(ServeConfig::new("static/")));
+        .get(
+            "/static/*",
+            ServeHandler::new({
+                let mut config = ServeConfig::new("static/");
+                config.unlisted(vec![".gitignore"]);
+                config
+            }),
+        );
     // .get("/static/*", ServeHandler::new(ServeConfig::new("..")));
 
     if let Err(e) = app.run("127.0.0.1:8000").await {

@@ -5,12 +5,14 @@ authors = ["Fangdun Cai <cfddream@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-bytes = "0.5"
 log = "0.4"
+bytes = "0.5"
+
 http = "0.2"
-futures = "0.3"
 headers = "0.2"
 hyper = "0.13" 
+
+futures = "0.3"
 mime-db = "0.1"
 
 trek-core = { path = "../trek-core", version = "0.0.0" }
