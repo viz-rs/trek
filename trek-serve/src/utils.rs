@@ -170,7 +170,7 @@ pub(crate) fn check_range(
             .unwrap_or(Some((0, max_len)));
     }
 
-    return Some((0, max_len));
+    Some((0, max_len))
 }
 
 pub(crate) fn file_respond(
