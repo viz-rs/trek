@@ -173,11 +173,11 @@ pub(crate) fn check_range(
     Some((0, max_len))
 }
 
-pub(crate) fn file_respond(
+pub(crate) fn respond(
     file: File,
     metadata: Metadata,
     headers: &HeaderMap,
-    content_type: impl AsRef<str>,
+    content_type: String,
 ) -> Response {
     let last_modified = metadata.modified().ok().map(LastModified::from);
     let mut len = metadata.len();
@@ -224,13 +224,13 @@ pub(crate) fn file_respond(
 
 pub(crate) async fn render(
     config: Arc<ServeConfig>,
-    suffix_path: String,
-    curr_path: &Path,
     path: PathBuf,
+    curr_path: &Path,
+    suffix_path: String,
 ) -> Result<String> {
-    let unlisted = config.unlisted.as_ref();
     let mut entries = read_dir(path.clone()).await?;
     let mut files = Vec::new();
+    let unlisted = config.unlisted.as_ref();
 
     while let Some(entry) = entries.next_entry().await? {
         let file_name = entry.file_name().into_string().unwrap();

@@ -31,9 +31,9 @@ impl ServeConfig {
         }
     }
 
-    pub fn unlisted(&mut self, list: Vec<&'static str>) -> &mut Self {
+    pub fn unlisted(&mut self, mut list: Vec<&'static str>) -> &mut Self {
         if self.unlisted.is_some() {
-            self.unlisted.as_mut().unwrap().append(&mut list.to_owned());
+            self.unlisted.as_mut().unwrap().append(&mut list);
         } else {
             self.unlisted = Some(list);
         }
@@ -58,50 +58,60 @@ impl ServeHandler {
         cx: Context<State>,
     ) -> Result {
         let mut path = config.public.clone();
-        let suffix_path = if cx.params.is_empty() {
-            "".to_owned()
-        } else {
-            cx.params::<String>()
-                .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "File not found"))?
+        let mut suffix_path = String::new();
+
+        if !cx.params.is_empty() {
+            if let Ok(p) = cx.params::<String>() {
+                suffix_path += &p;
+            }
         };
 
         path.push(suffix_path.clone());
 
         let file = File::open(path.clone()).await?;
-
         let metadata = file.metadata().await?;
         let file_type = metadata.file_type();
 
-        let res = if file_type.is_file() {
-            let content_type = match path.extension() {
-                Some(ext) => mime_db::lookup(ext.to_owned().into_string().unwrap()),
-                None => None,
-            }
-            .unwrap_or_else(|| "application/octet-stream");
-            let headers = cx.headers();
+        if file_type.is_file() {
+            return Ok(respond(
+                file,
+                metadata,
+                cx.headers(),
+                path.extension()
+                    .and_then(|ext| {
+                        ext.to_str()
+                            .and_then(|ext| mime_db::lookup(ext))
+                            .and_then(|ext| Some(ext.to_owned()))
+                    })
+                    .unwrap_or_else(|| mime::APPLICATION_OCTET_STREAM.to_string()),
+            ));
+        }
 
-            Ok(file_respond(file, metadata, headers, content_type))
-        } else if file_type.is_dir() {
+        let is_dir = file_type.is_dir();
+
+        if is_dir {
             let index_file = path.join("index.html");
 
             if index_file.exists() {
-                let file = File::open(index_file).await?;
+                let file = File::open(index_file.clone()).await?;
                 let metadata = file.metadata().await?;
-                let headers = cx.headers();
 
-                return Ok(file_respond(
-                    file,
-                    metadata,
-                    headers,
-                    "text/html; charset=utf-8",
-                ));
-                // String::from_utf8_lossy(&read(index_file).await?).to_string()
+                if metadata.file_type().is_file() {
+                    return Ok(respond(
+                        file,
+                        metadata,
+                        cx.headers(),
+                        mime::TEXT_HTML_UTF_8.to_string(),
+                    ));
+                }
             }
+        }
 
-            let body = render(config, suffix_path, Path::new(cx.path()), path.clone()).await?;
+        let res = if is_dir {
+            let body = render(config, path, Path::new(cx.path()), suffix_path).await?;
 
             HyperResponse::builder()
-                .header(CONTENT_TYPE, "text/html; charset=utf-8")
+                .header(CONTENT_TYPE, mime::TEXT_HTML_UTF_8.to_string())
                 .header(CONTENT_LENGTH, body.len())
                 .body(Body::from(body))
         } else {

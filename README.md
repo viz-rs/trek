@@ -1,8 +1,19 @@
-# Trek
+<div align="center">
+  <h1>Trek</h1>
+   <p>
+    <strong>Fast, effective, minimalist web framework for Rust</strong>
+  </p>
 
-Fast, effective, minimalist web framework for Rust. Based on [Futures], [Hyper], [Tokio] or [Async-std].
+  <p>Based on
+    <a href="https://rust-lang-nursery.github.io/futures-rs/" rel="nofollow">Futures</a>,
+    <a href="https://hyper.rs/" rel="nofollow">Hyper</a>,
+    <a href="https://tokio.rs/" rel="nofollow">Tokio</a> or <a href="https://async.rs/" rel="nofollow">Async-std</a>.
+  </p>
+</div>
 
-[![CI Status](https://github.com/trek-rs/trek/workflows/CI/badge.svg)](https://github.com/trek-rs/trek/actions)
+<div align="center">
+  <a href="https://github.com/trek-rs/trek/actions"><img src="https://github.com/trek-rs/trek/workflows/CI/badge.svg" alt="CI Status" style="max-width:100%;"></a>
+</div>
 
 <!-- [![Build Status](https://travis-ci.org/trek-rs/trek.svg?branch=master)](https://travis-ci.org/trek-rs/trek) -->
 <!-- [![Latest version](https://img.shields.io/crates/v/trek.svg)](https://crates.io/crates/trek) -->

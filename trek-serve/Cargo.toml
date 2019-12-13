@@ -9,7 +9,7 @@ log = "0.4"
 bytes = "0.5"
 
 http = "0.2"
-headers = { git = "https://github.com/hyperium/headers.git" }
+headers = "0.3" 
 hyper = "0.13" 
 
 futures = "0.3"
