@@ -68,7 +68,7 @@ pub(crate) fn file_stream(
                     return Poll::Ready(None);
                 }
 
-                let mut chunk = buf.split_to(buf.len()).freeze();
+                let mut chunk = buf.split().freeze();
                 if n > len {
                     chunk = chunk.split_to(len as usize);
                     len = 0;
