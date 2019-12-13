@@ -79,9 +79,8 @@ impl ServeHandler {
                 cx.headers(),
                 path.extension()
                     .and_then(|ext| {
-                        ext.to_str().and_then(|ext| {
-                            mime_db::lookup(ext).and_then(|ext| Some(ext.to_owned()))
-                        })
+                        ext.to_str()
+                            .and_then(|ext| mime_db::lookup(ext).map(|ext| ext.to_owned()))
                     })
                     .unwrap_or_else(|| mime::APPLICATION_OCTET_STREAM.to_string()),
             ));
