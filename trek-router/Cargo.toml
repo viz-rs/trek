@@ -20,7 +20,7 @@ log = "0.4"
 
 http = "0.2"
 
-fnv = "1.0"
+fxhash = "0.2"
 Inflector = "0.11"
 path-tree = "0.1"
 

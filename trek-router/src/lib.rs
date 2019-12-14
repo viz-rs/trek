@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate log;
 
-use fnv::FnvHashMap;
+use fxhash::FxHashMap;
 use http::Method;
 use inflector::string::{pluralize::to_plural, singularize::to_singular};
 use path_tree::PathTree;
@@ -17,7 +17,7 @@ pub use resource::{Resource, Resources};
 
 pub(crate) type VecMiddleware<Context> = Vec<Arc<dyn Middleware<Context>>>;
 
-pub(crate) type Trees<Context> = FnvHashMap<Method, PathTree<VecMiddleware<Context>>>;
+pub(crate) type Trees<Context> = FxHashMap<Method, PathTree<VecMiddleware<Context>>>;
 
 pub struct Router<Context> {
     path: String,
