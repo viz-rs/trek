@@ -1,5 +1,6 @@
-use crate::{Context, Middleware, Response};
+use crate::{Body, Context, Middleware, Response};
 use futures::future::BoxFuture;
+use http::status::StatusCode;
 
 #[derive(Debug, Clone, Default)]
 pub struct NotFound;
@@ -13,10 +14,9 @@ impl NotFound {
 impl<State: Send + Sync + 'static> Middleware<Context<State>> for NotFound {
     fn call<'a>(&'a self, _: Context<State>) -> BoxFuture<'a, Response> {
         Box::pin(async {
-            hyper::Response::builder()
-                .status(http::status::StatusCode::NOT_FOUND)
-                .body(hyper::Body::empty())
-                .unwrap()
+            let mut res = Response::new(Body::empty());
+            *res.status_mut() = StatusCode::NOT_FOUND;
+            res
         })
     }
 }

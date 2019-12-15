@@ -42,9 +42,19 @@ impl<State: Send + Sync + 'static> Context<State> {
         }
     }
 
-    ///  Access the state.
+    ///  Access app-state.
     pub fn state(&self) -> &State {
         &self.state
+    }
+
+    /// Get a local-state value.
+    pub fn get<T: Send + Sync + 'static>(&self) -> Option<&T> {
+        self.extensions().get()
+    }
+
+    /// Set a local-state value.
+    pub fn set<T: Send + Sync + 'static>(&mut self, val: T) -> Option<T> {
+        self.extensions_mut().insert(val)
     }
 
     /// Access the request's HTTP method.
